@@ -4,6 +4,40 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.0.12] - 2026-05-04
+
+### Added
+- Personal Home — My Action Items section (closes #16)
+  - Open Action Items assigned to current user shown above task list
+  - "Carried over" yellow badge for items created before current week
+  - "Overdue" red badge for items past their due date
+  - Inline "Complete" button via `CompleteActionItemButton` client component
+  - `PATCH /api/action-items/[id]` sets completedAt, restricted to assignee
+  - Section hidden when no open items
+
+---
+
+## [0.0.11] - 2026-05-04
+
+### Added
+- Personal Home — Flagged Tasks section (closes #15)
+  - Tasks with no estimated hours surfaced with red "Missing estimate" badge
+  - Separate section below task list, hidden when empty
+
+---
+
+## [0.0.10] - 2026-05-04
+
+### Added
+- Personal Home — Bandwidth % + Tasks This Week (closes #14)
+  - Color-coded bandwidth bar: green <70%, yellow 70–90%, red ≥90%
+  - Available bandwidth and remaining hours displayed
+  - Tasks due this week sorted by due date, overdue rows at top in red
+  - Each task shows title, project, due date, estimated/logged hours, status badge
+  - Unlinked users shown yellow notice linking to Settings
+
+---
+
 ## [0.0.9] - 2026-05-04
 
 ### Added
