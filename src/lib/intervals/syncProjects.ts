@@ -25,43 +25,33 @@ async function fetchAllProjects(): Promise<IntervalsProject[]> {
 
 export async function syncProjects(): Promise<{ synced: number; errors: string[] }> {
   const projects = await fetchAllProjects();
-  let synced = 0;
-  const errors: string[] = [];
-  const BATCH = 10;
 
-  for (let i = 0; i < projects.length; i += BATCH) {
-    const batch = projects.slice(i, i + BATCH);
-    await Promise.all(
-      batch.map(async (project) => {
-        try {
-          await prisma.intervalsProject.upsert({
-            where: { intervalsId: String(project.id) },
-            update: {
-              name: project.name,
-              clientName: project.client || null,
-              status: project.active === "t" ? "active" : "inactive",
-              budgetAmount: project.budget ? parseFloat(project.budget) : null,
-              startDate: project.datestart ? new Date(project.datestart) : null,
-              dueDate: project.dateend ? new Date(project.dateend) : null,
-              syncedAt: new Date(),
-            },
-            create: {
-              intervalsId: String(project.id),
-              name: project.name,
-              clientName: project.client || null,
-              status: project.active === "t" ? "active" : "inactive",
-              budgetAmount: project.budget ? parseFloat(project.budget) : null,
-              startDate: project.datestart ? new Date(project.datestart) : null,
-              dueDate: project.dateend ? new Date(project.dateend) : null,
-            },
-          });
-          synced++;
-        } catch (err) {
-          errors.push(`Project ${project.id}: ${String(err)}`);
-        }
-      })
-    );
-  }
+  // Use an interactive transaction so all upserts share one connection
+  await prisma.$transaction(async (tx) => {
+    for (const project of projects) {
+      await tx.intervalsProject.upsert({
+        where: { intervalsId: String(project.id) },
+        update: {
+          name: project.name,
+          clientName: project.client || null,
+          status: project.active === "t" ? "active" : "inactive",
+          budgetAmount: project.budget ? parseFloat(project.budget) : null,
+          startDate: project.datestart ? new Date(project.datestart) : null,
+          dueDate: project.dateend ? new Date(project.dateend) : null,
+          syncedAt: new Date(),
+        },
+        create: {
+          intervalsId: String(project.id),
+          name: project.name,
+          clientName: project.client || null,
+          status: project.active === "t" ? "active" : "inactive",
+          budgetAmount: project.budget ? parseFloat(project.budget) : null,
+          startDate: project.datestart ? new Date(project.datestart) : null,
+          dueDate: project.dateend ? new Date(project.dateend) : null,
+        },
+      });
+    }
+  }, { timeout: 55000 });
 
-  return { synced, errors };
+  return { synced: projects.length, errors: [] };
 }

@@ -43,46 +43,37 @@ export async function syncTasks(): Promise<{ synced: number; errors: string[] }>
   const projectMap = new Map(projects.map((p) => [p.intervalsId, p.id]));
   const personMap = new Map(people.map((p) => [p.intervalsId, p.id]));
 
-  let synced = 0;
-  const errors: string[] = [];
-  const BATCH = 10;
+  // Filter out tasks with no matching project (orphaned in Intervals)
+  const validTasks = tasks.filter((t) => projectMap.has(String(t.projectid)));
 
-  for (let i = 0; i < tasks.length; i += BATCH) {
-    const batch = tasks.slice(i, i + BATCH);
-    await Promise.all(
-      batch.map(async (task) => {
-        const projectId = projectMap.get(String(task.projectid));
-        if (!projectId) return;
-        const assigneeId = task.assigneeid ? (personMap.get(String(task.assigneeid)) ?? null) : null;
-        try {
-          await prisma.intervalsTask.upsert({
-            where: { intervalsId: String(task.id) },
-            update: {
-              title: task.title,
-              projectId,
-              assigneeId,
-              status: normalizeStatus(task.status),
-              estimatedHours: task.estimate ? parseFloat(task.estimate) : null,
-              dueDate: task.datedue ? new Date(task.datedue) : null,
-              syncedAt: new Date(),
-            },
-            create: {
-              intervalsId: String(task.id),
-              title: task.title,
-              projectId,
-              assigneeId,
-              status: normalizeStatus(task.status),
-              estimatedHours: task.estimate ? parseFloat(task.estimate) : null,
-              dueDate: task.datedue ? new Date(task.datedue) : null,
-            },
-          });
-          synced++;
-        } catch (err) {
-          errors.push(`Task ${task.id}: ${String(err)}`);
-        }
-      })
-    );
-  }
+  // Use an interactive transaction so all upserts share one connection
+  await prisma.$transaction(async (tx) => {
+    for (const task of validTasks) {
+      const projectId = projectMap.get(String(task.projectid))!;
+      const assigneeId = task.assigneeid ? (personMap.get(String(task.assigneeid)) ?? null) : null;
+      await tx.intervalsTask.upsert({
+        where: { intervalsId: String(task.id) },
+        update: {
+          title: task.title,
+          projectId,
+          assigneeId,
+          status: normalizeStatus(task.status),
+          estimatedHours: task.estimate ? parseFloat(task.estimate) : null,
+          dueDate: task.datedue ? new Date(task.datedue) : null,
+          syncedAt: new Date(),
+        },
+        create: {
+          intervalsId: String(task.id),
+          title: task.title,
+          projectId,
+          assigneeId,
+          status: normalizeStatus(task.status),
+          estimatedHours: task.estimate ? parseFloat(task.estimate) : null,
+          dueDate: task.datedue ? new Date(task.datedue) : null,
+        },
+      });
+    }
+  }, { timeout: 55000 });
 
-  return { synced, errors };
+  return { synced: validTasks.length, errors: [] };
 }
