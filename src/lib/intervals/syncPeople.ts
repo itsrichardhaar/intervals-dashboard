@@ -28,28 +28,33 @@ export async function syncPeople(): Promise<{ synced: number; errors: string[] }
   // Only sync active people — inactive are historical contractors/clients
   const active = people.filter((p) => p.active === "t");
 
-  await Promise.all(
-    active.map(async (person) => {
-      try {
-        await prisma.intervalsPerson.upsert({
-          where: { intervalsId: String(person.id) },
-          update: {
-            name: `${person.firstname} ${person.lastname}`.trim(),
-            active: true,
-            syncedAt: new Date(),
-          },
-          create: {
-            intervalsId: String(person.id),
-            name: `${person.firstname} ${person.lastname}`.trim(),
-            active: true,
-          },
-        });
-        synced++;
-      } catch (err) {
-        errors.push(`Person ${person.id}: ${String(err)}`);
-      }
-    })
-  );
+  // Batch size matches DB connection pool limit (5)
+  const BATCH = 5;
+  for (let i = 0; i < active.length; i += BATCH) {
+    const batch = active.slice(i, i + BATCH);
+    await Promise.all(
+      batch.map(async (person) => {
+        try {
+          await prisma.intervalsPerson.upsert({
+            where: { intervalsId: String(person.id) },
+            update: {
+              name: `${person.firstname} ${person.lastname}`.trim(),
+              active: true,
+              syncedAt: new Date(),
+            },
+            create: {
+              intervalsId: String(person.id),
+              name: `${person.firstname} ${person.lastname}`.trim(),
+              active: true,
+            },
+          });
+          synced++;
+        } catch (err) {
+          errors.push(`Person ${person.id}: ${String(err)}`);
+        }
+      })
+    );
+  }
 
   // Mark previously active people as inactive if they're no longer in the active list
   const activeIds = active.map((p) => String(p.id));

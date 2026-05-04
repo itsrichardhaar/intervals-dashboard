@@ -45,7 +45,7 @@ export async function syncTasks(): Promise<{ synced: number; errors: string[] }>
 
   let synced = 0;
   const errors: string[] = [];
-  const BATCH = 20;
+  const BATCH = 5;
 
   for (let i = 0; i < tasks.length; i += BATCH) {
     const batch = tasks.slice(i, i + BATCH);

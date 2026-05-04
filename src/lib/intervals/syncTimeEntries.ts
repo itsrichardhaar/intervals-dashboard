@@ -52,31 +52,20 @@ export async function syncTimeEntries(): Promise<{ synced: number; errors: strin
   const personMap = new Map(people.map((p) => [p.intervalsId, p.id]));
   const projectMap = new Map(projects.map((p) => [p.intervalsId, p.id]));
 
-  let synced = 0;
-  const errors: string[] = [];
-  const BATCH = 20;
+  const records = entries.map((entry) => ({
+    intervalsId: String(entry.id),
+    taskId: entry.taskid ? (taskMap.get(String(entry.taskid)) ?? null) : null,
+    personId: entry.personid ? (personMap.get(String(entry.personid)) ?? null) : null,
+    projectId: entry.projectid ? (projectMap.get(String(entry.projectid)) ?? null) : null,
+    hours: parseFloat(entry.time) || 0,
+    date: new Date(entry.date),
+  }));
 
-  for (let i = 0; i < entries.length; i += BATCH) {
-    const batch = entries.slice(i, i + BATCH);
-    await Promise.all(
-      batch.map(async (entry) => {
-        const taskId = entry.taskid ? (taskMap.get(String(entry.taskid)) ?? null) : null;
-        const personId = entry.personid ? (personMap.get(String(entry.personid)) ?? null) : null;
-        const projectId = entry.projectid ? (projectMap.get(String(entry.projectid)) ?? null) : null;
-        const hours = parseFloat(entry.time) || 0;
-        try {
-          await prisma.intervalsTimeEntry.upsert({
-            where: { intervalsId: String(entry.id) },
-            update: { taskId, personId, projectId, hours, date: new Date(entry.date), syncedAt: new Date() },
-            create: { intervalsId: String(entry.id), taskId, personId, projectId, hours, date: new Date(entry.date) },
-          });
-          synced++;
-        } catch (err) {
-          errors.push(`TimeEntry ${entry.id}: ${String(err)}`);
-        }
-      })
-    );
-  }
+  // Bulk insert — skip records already in DB (idempotent on intervalsId)
+  const result = await prisma.intervalsTimeEntry.createMany({
+    data: records,
+    skipDuplicates: true,
+  });
 
   // Recompute loggedHours for all tasks from the full DB
   const grouped = await prisma.intervalsTimeEntry.groupBy({
@@ -93,5 +82,5 @@ export async function syncTimeEntries(): Promise<{ synced: number; errors: strin
     )
   );
 
-  return { synced, errors };
+  return { synced: result.count, errors: [] };
 }
