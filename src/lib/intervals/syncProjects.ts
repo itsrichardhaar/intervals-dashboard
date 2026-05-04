@@ -5,7 +5,8 @@ interface IntervalsProject {
   id: string;
   name: string;
   clientname: string;
-  status: string;
+  status?: string;
+  projectstatus?: string;
   budget: string;
   estimatedhours: string;
   startdate: string;
@@ -31,7 +32,7 @@ export async function syncProjects(): Promise<{ synced: number; errors: string[]
         update: {
           name: project.name,
           clientName: project.clientname || null,
-          status: project.status,
+          status: project.status ?? project.projectstatus ?? "active",
           estimatedHours: project.estimatedhours ? parseFloat(project.estimatedhours) : null,
           budgetAmount: project.budget ? parseFloat(project.budget) : null,
           startDate: project.startdate ? new Date(project.startdate) : null,
@@ -42,7 +43,7 @@ export async function syncProjects(): Promise<{ synced: number; errors: string[]
           intervalsId: String(project.id),
           name: project.name,
           clientName: project.clientname || null,
-          status: project.status,
+          status: project.status ?? project.projectstatus ?? "active",
           estimatedHours: project.estimatedhours ? parseFloat(project.estimatedhours) : null,
           budgetAmount: project.budget ? parseFloat(project.budget) : null,
           startDate: project.startdate ? new Date(project.startdate) : null,
