@@ -4,6 +4,56 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.0.9] - 2026-05-04
+
+### Added
+- User–Intervals manual mapping API (`PUT /api/users/[id]/mapping`) — override auto-match in Settings (closes #13)
+- Settings page: team member list with Intervals link status, manual mapping UI
+
+---
+
+## [0.0.8] - 2026-05-04
+
+### Added
+- User–Intervals email auto-match on first login (`src/lib/mapping/autoMatch.ts`) — links dashboard user to Intervals person by email, skips if already mapped (closes #12)
+
+---
+
+## [0.0.7] - 2026-05-04
+
+### Added
+- Invite-only user creation: `POST /api/users` generates a temp password, `GET /api/users` lists team (closes #10)
+- Settings page (`/settings`) — invite form, team table with Intervals link status
+- Vercel Cron job wiring (`vercel.json`) — fires `GET /api/sync` every 15 minutes with Bearer auth (closes #11)
+- Sync API route (`/api/sync`) — runs all four sync jobs sequentially, writes SyncLog, handles partial failures
+
+---
+
+## [0.0.6] - 2026-05-04
+
+### Added
+- Intervals sync — Time Entries (`src/lib/intervals/syncTimeEntries.ts`) — upserts time entries and aggregates loggedHours back onto each task (closes #9)
+
+---
+
+## [0.0.5] - 2026-05-04
+
+### Added
+- Intervals sync — Tasks (`src/lib/intervals/syncTasks.ts`) — upserts tasks, normalizes status strings to internal values (closes #8)
+
+---
+
+## [0.0.4] - 2026-05-04
+
+### Added
+- App shell: dashboard layout, Sidebar navigation, placeholder Home page
+- Login page (`/login`) with NextAuth credentials sign-in, error handling, session redirect (closes #5)
+- Intervals API client (`src/lib/intervals/client.ts`) — Basic auth with admin token
+- Intervals sync — People (`src/lib/intervals/syncPeople.ts`) — upsert with active flag (closes #6)
+- Intervals sync — Projects (`src/lib/intervals/syncProjects.ts`) — upsert with budget + dates (closes #7)
+
+---
+
 ## [0.0.3] - 2026-05-04
 
 ### Added

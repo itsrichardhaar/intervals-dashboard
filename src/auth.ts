@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
+import { autoMatchUserToIntervals } from "@/lib/mapping/autoMatch";
 import bcrypt from "bcryptjs";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -39,7 +40,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   callbacks: {
     async jwt({ token, user }) {
-      if (user) token.id = user.id;
+      if (user) {
+        token.id = user.id;
+        // Attempt auto-match on first sign-in
+        if (user.email) {
+          await autoMatchUserToIntervals(user.id!, user.email).catch(() => {});
+        }
+      }
       return token;
     },
     async session({ session, token }) {
