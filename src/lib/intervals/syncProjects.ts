@@ -26,10 +26,10 @@ async function fetchAllProjects(): Promise<IntervalsProject[]> {
 export async function syncProjects(): Promise<{ synced: number; errors: string[] }> {
   const projects = await fetchAllProjects();
 
-  // Use an interactive transaction so all upserts share one connection
-  await prisma.$transaction(async (tx) => {
-    for (const project of projects) {
-      await tx.intervalsProject.upsert({
+  // Batch transaction — compatible with PgBouncer transaction mode
+  await prisma.$transaction(
+    projects.map((project) =>
+      prisma.intervalsProject.upsert({
         where: { intervalsId: String(project.id) },
         update: {
           name: project.name,
@@ -49,9 +49,9 @@ export async function syncProjects(): Promise<{ synced: number; errors: string[]
           startDate: project.datestart ? new Date(project.datestart) : null,
           dueDate: project.dateend ? new Date(project.dateend) : null,
         },
-      });
-    }
-  }, { timeout: 55000 });
+      })
+    )
+  );
 
   return { synced: projects.length, errors: [] };
 }

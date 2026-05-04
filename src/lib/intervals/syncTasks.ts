@@ -46,12 +46,12 @@ export async function syncTasks(): Promise<{ synced: number; errors: string[] }>
   // Filter out tasks with no matching project (orphaned in Intervals)
   const validTasks = tasks.filter((t) => projectMap.has(String(t.projectid)));
 
-  // Use an interactive transaction so all upserts share one connection
-  await prisma.$transaction(async (tx) => {
-    for (const task of validTasks) {
+  // Batch transaction — compatible with PgBouncer transaction mode
+  await prisma.$transaction(
+    validTasks.map((task) => {
       const projectId = projectMap.get(String(task.projectid))!;
       const assigneeId = task.assigneeid ? (personMap.get(String(task.assigneeid)) ?? null) : null;
-      await tx.intervalsTask.upsert({
+      return prisma.intervalsTask.upsert({
         where: { intervalsId: String(task.id) },
         update: {
           title: task.title,
@@ -72,8 +72,8 @@ export async function syncTasks(): Promise<{ synced: number; errors: string[] }>
           dueDate: task.datedue ? new Date(task.datedue) : null,
         },
       });
-    }
-  }, { timeout: 55000 });
+    })
+  );
 
   return { synced: validTasks.length, errors: [] };
 }
