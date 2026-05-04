@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.0.13] - 2026-05-04
+
+### Fixed
+- Sync: corrected Intervals API field names for projects (`client`, `datestart`, `dateend`, `active`)
+- Sync: corrected Intervals API field names for tasks (`estimate`, `datedue`)
+- Sync: added full pagination to people (492 records), projects (1,278), and tasks (2,119)
+- Sync: active-only filter for people (`active === "t"`); marks previously-active people inactive
+- Sync: pre-fetch FK maps to avoid N+1 queries causing timeouts on tasks and time-entries
+
+---
+
 ## [0.0.12] - 2026-05-04
 
 ### Added
