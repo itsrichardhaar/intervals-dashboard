@@ -43,37 +43,47 @@ export async function syncTasks(): Promise<{ synced: number; errors: string[] }>
   const projectMap = new Map(projects.map((p) => [p.intervalsId, p.id]));
   const personMap = new Map(people.map((p) => [p.intervalsId, p.id]));
 
-  // Filter out tasks with no matching project (orphaned in Intervals)
+  // Only sync tasks belonging to projects we have in our DB
   const validTasks = tasks.filter((t) => projectMap.has(String(t.projectid)));
+  if (validTasks.length === 0) return { synced: 0, errors: [] };
 
-  // Batch transaction — compatible with PgBouncer transaction mode
-  await prisma.$transaction(
-    validTasks.map((task) => {
-      const projectId = projectMap.get(String(task.projectid))!;
-      const assigneeId = task.assigneeid ? (personMap.get(String(task.assigneeid)) ?? null) : null;
-      return prisma.intervalsTask.upsert({
-        where: { intervalsId: String(task.id) },
-        update: {
-          title: task.title,
-          projectId,
-          assigneeId,
-          status: normalizeStatus(task.status),
-          estimatedHours: task.estimate ? parseFloat(task.estimate) : null,
-          dueDate: task.datedue ? new Date(task.datedue) : null,
-          syncedAt: new Date(),
-        },
-        create: {
-          intervalsId: String(task.id),
-          title: task.title,
-          projectId,
-          assigneeId,
-          status: normalizeStatus(task.status),
-          estimatedHours: task.estimate ? parseFloat(task.estimate) : null,
-          dueDate: task.datedue ? new Date(task.datedue) : null,
-        },
-      });
-    })
+  // Build typed arrays for a single bulk upsert — one DB round-trip regardless of record count
+  const intervalsIds = validTasks.map((t) => String(t.id));
+  const titles = validTasks.map((t) => t.title);
+  const projectIds = validTasks.map((t) => projectMap.get(String(t.projectid))!);
+  const assigneeIds = validTasks.map((t) =>
+    t.assigneeid ? (personMap.get(String(t.assigneeid)) ?? null) : null
   );
+  const statuses = validTasks.map((t) => normalizeStatus(t.status));
+  const estimatedHours = validTasks.map((t) =>
+    t.estimate ? parseFloat(t.estimate) : null
+  );
+  const dueDates = validTasks.map((t) =>
+    t.datedue ? new Date(t.datedue) : null
+  );
+
+  await prisma.$executeRaw`
+    INSERT INTO "IntervalsTask" (id, "intervalsId", title, "projectId", "assigneeId", status, "estimatedHours", "dueDate", "loggedHours", "syncedAt")
+    SELECT
+      gen_random_uuid()::text,
+      unnest(${intervalsIds}::text[]),
+      unnest(${titles}::text[]),
+      unnest(${projectIds}::text[]),
+      unnest(${assigneeIds}::text[]),
+      unnest(${statuses}::text[]),
+      unnest(${estimatedHours}::float8[]),
+      unnest(${dueDates}::timestamptz[]),
+      0,
+      NOW()
+    ON CONFLICT ("intervalsId") DO UPDATE SET
+      title            = EXCLUDED.title,
+      "projectId"      = EXCLUDED."projectId",
+      "assigneeId"     = EXCLUDED."assigneeId",
+      status           = EXCLUDED.status,
+      "estimatedHours" = EXCLUDED."estimatedHours",
+      "dueDate"        = EXCLUDED."dueDate",
+      "syncedAt"       = EXCLUDED."syncedAt"
+  `;
 
   return { synced: validTasks.length, errors: [] };
 }

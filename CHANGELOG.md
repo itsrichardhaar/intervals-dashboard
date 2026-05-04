@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.0.17] - 2026-05-04
+
+### Changed
+- Sync projects: only sync active projects (skip archived/inactive) to reduce record count and DB load
+- Sync projects: marks previously-active projects inactive when they're archived in Intervals
+
+### Fixed
+- Sync projects + tasks: replaced sequential upsert loops with a single PostgreSQL `unnest` bulk upsert — one DB round-trip regardless of record count, solving cross-region latency timeouts
+
+---
+
 ## [0.0.16] - 2026-05-04
 
 ### Fixed
