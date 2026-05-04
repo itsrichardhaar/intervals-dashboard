@@ -14,23 +14,10 @@ interface IntervalsPersonResponse {
 }
 
 async function fetchAllPeople(): Promise<IntervalsPerson[]> {
-  const PAGE_SIZE = 250;
-  const first = await intervalsGet<IntervalsPersonResponse>(`/person/?limit=${PAGE_SIZE}&page=1`);
-  const total = first.listcount ?? 0;
-  const raw = first.person;
-  const firstPage = Array.isArray(raw) ? raw : raw ? [raw] : [];
-
-  if (total <= PAGE_SIZE) return firstPage;
-
-  const totalPages = Math.ceil(total / PAGE_SIZE);
-  const remaining: IntervalsPerson[][] = [];
-  for (let page = 2; page <= totalPages; page++) {
-    const d = await intervalsGet<IntervalsPersonResponse>(`/person/?limit=${PAGE_SIZE}&page=${page}`);
-    const r = d.person;
-    remaining.push(Array.isArray(r) ? r : r ? [r] : []);
-  }
-
-  return [firstPage, ...remaining].flat();
+  // /person/ does not support the `page` parameter — fetch all in one request
+  const data = await intervalsGet<IntervalsPersonResponse>(`/person/?limit=1000`);
+  const raw = data.person;
+  return Array.isArray(raw) ? raw : raw ? [raw] : [];
 }
 
 export async function syncPeople(): Promise<{ synced: number; errors: string[] }> {

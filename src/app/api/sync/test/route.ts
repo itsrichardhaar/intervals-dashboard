@@ -1,27 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyCronAuth } from "@/lib/intervals/syncAuth";
 
-export const maxDuration = 10;
+export const maxDuration = 15;
 
 export async function GET(req: NextRequest) {
   if (!verifyCronAuth(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const token = process.env.INTERVALS_API_TOKEN ?? "";
   const credentials = Buffer.from(`${token}:x`).toString("base64");
+  const headers = { Authorization: `Basic ${credentials}`, Accept: "application/json" };
 
-  const res = await fetch("https://api.myintervals.com/person/?limit=1&page=1", {
-    headers: {
-      Authorization: `Basic ${credentials}`,
-      Accept: "application/json",
-    },
-  });
-
-  const body = await res.text();
+  const [personRes, projectPage2Res, taskPage2Res, timeRes] = await Promise.all([
+    fetch("https://api.myintervals.com/person/?limit=5", { headers }).then(r => r.json()),
+    fetch("https://api.myintervals.com/project/?limit=5&page=2", { headers }).then(r => r.json()),
+    fetch("https://api.myintervals.com/task/?limit=5&page=2", { headers }).then(r => r.json()),
+    fetch("https://api.myintervals.com/time/?limit=5&page=2", { headers }).then(r => r.json()),
+  ]);
 
   return NextResponse.json({
-    tokenLength: token.length,
-    tokenPrefix: token.slice(0, 4),
-    intervalsStatus: res.status,
-    intervalsBody: body.slice(0, 500),
+    person_no_page: { error: personRes.error ?? null, hasData: !!personRes.person },
+    project_page2: { error: projectPage2Res.error ?? null, hasData: !!projectPage2Res.project },
+    task_page2: { error: taskPage2Res.error ?? null, hasData: !!taskPage2Res.task },
+    time_page2: { error: timeRes.error ?? null, hasData: !!timeRes.time },
   });
 }
