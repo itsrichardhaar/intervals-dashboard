@@ -15,7 +15,6 @@ interface IntervalsTaskResponse {
   task: IntervalsTask | IntervalsTask[];
 }
 
-// Normalize Intervals task status strings to our internal values
 function normalizeStatus(status: string): string {
   const s = status.toLowerCase().trim();
   if (s === "open") return "open";
@@ -30,35 +29,32 @@ export async function syncTasks(): Promise<{ synced: number; errors: string[] }>
   const errors: string[] = [];
   let synced = 0;
 
-  // Fetch all non-closed tasks; also fetch recently closed to keep archive accurate
   const data = await intervalsGet<IntervalsTaskResponse>("/task/?limit=500");
   const raw = data.task;
   const tasks = Array.isArray(raw) ? raw : raw ? [raw] : [];
 
+  // Pre-fetch FK maps in bulk — eliminates N+1 queries
+  const [projects, people] = await Promise.all([
+    prisma.intervalsProject.findMany({ select: { id: true, intervalsId: true } }),
+    prisma.intervalsPerson.findMany({ select: { id: true, intervalsId: true } }),
+  ]);
+
+  const projectMap = new Map(projects.map((p) => [p.intervalsId, p.id]));
+  const personMap = new Map(people.map((p) => [p.intervalsId, p.id]));
+
   for (const task of tasks) {
     try {
-      // Resolve project FK
-      const project = await prisma.intervalsProject.findUnique({
-        where: { intervalsId: String(task.projectid) },
-        select: { id: true },
-      });
-      if (!project) continue;
+      const projectId = projectMap.get(String(task.projectid));
+      if (!projectId) continue;
 
-      // Resolve person FK (optional)
-      let assignee = null;
-      if (task.assigneeid) {
-        assignee = await prisma.intervalsPerson.findUnique({
-          where: { intervalsId: String(task.assigneeid) },
-          select: { id: true },
-        });
-      }
+      const assigneeId = task.assigneeid ? (personMap.get(String(task.assigneeid)) ?? null) : null;
 
       await prisma.intervalsTask.upsert({
         where: { intervalsId: String(task.id) },
         update: {
           title: task.title,
-          projectId: project.id,
-          assigneeId: assignee?.id ?? null,
+          projectId,
+          assigneeId,
           status: normalizeStatus(task.status),
           estimatedHours: task.estimatedhours ? parseFloat(task.estimatedhours) : null,
           dueDate: task.duedate ? new Date(task.duedate) : null,
@@ -67,8 +63,8 @@ export async function syncTasks(): Promise<{ synced: number; errors: string[] }>
         create: {
           intervalsId: String(task.id),
           title: task.title,
-          projectId: project.id,
-          assigneeId: assignee?.id ?? null,
+          projectId,
+          assigneeId,
           status: normalizeStatus(task.status),
           estimatedHours: task.estimatedhours ? parseFloat(task.estimatedhours) : null,
           dueDate: task.duedate ? new Date(task.duedate) : null,

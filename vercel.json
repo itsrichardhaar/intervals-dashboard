@@ -1,8 +1,8 @@
 {
   "crons": [
-    {
-      "path": "/api/sync",
-      "schedule": "*/15 * * * *"
-    }
+    { "path": "/api/sync/people",       "schedule": "*/15 * * * *" },
+    { "path": "/api/sync/projects",     "schedule": "*/15 * * * *" },
+    { "path": "/api/sync/tasks",        "schedule": "*/15 * * * *" },
+    { "path": "/api/sync/time-entries", "schedule": "*/15 * * * *" }
   ]
 }

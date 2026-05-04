@@ -16,4 +16,5 @@ export default auth((req) => {
 
 export const config = {
   matcher: ["/((?!api/auth|api/sync|_next/static|_next/image|favicon.ico).*)"],
+  // /api/sync and all sub-routes are protected by CRON_SECRET, not session auth
 };
