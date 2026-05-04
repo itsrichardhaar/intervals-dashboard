@@ -27,23 +27,10 @@ function normalizeStatus(status: string): string {
 }
 
 async function fetchAllTasks(): Promise<IntervalsTask[]> {
-  const PAGE_SIZE = 500;
-  const first = await intervalsGet<IntervalsTaskResponse>(`/task/?limit=${PAGE_SIZE}&page=1`);
-  const total = first.listcount ?? 0;
-  const raw = first.task;
-  const firstPage = Array.isArray(raw) ? raw : raw ? [raw] : [];
-
-  if (total <= PAGE_SIZE) return firstPage;
-
-  const totalPages = Math.ceil(total / PAGE_SIZE);
-  const remaining: IntervalsTask[][] = [];
-  for (let page = 2; page <= totalPages; page++) {
-    const d = await intervalsGet<IntervalsTaskResponse>(`/task/?limit=${PAGE_SIZE}&page=${page}`);
-    const r = d.task;
-    remaining.push(Array.isArray(r) ? r : r ? [r] : []);
-  }
-
-  return [firstPage, ...remaining].flat();
+  // /task/ does not support `page` — use a limit large enough for all records
+  const data = await intervalsGet<IntervalsTaskResponse>(`/task/?limit=3000`);
+  const raw = data.task;
+  return Array.isArray(raw) ? raw : raw ? [raw] : [];
 }
 
 export async function syncTasks(): Promise<{ synced: number; errors: string[] }> {

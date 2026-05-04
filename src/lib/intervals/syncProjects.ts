@@ -17,23 +17,10 @@ interface IntervalsProjectResponse {
 }
 
 async function fetchAllProjects(): Promise<IntervalsProject[]> {
-  const PAGE_SIZE = 250;
-  const first = await intervalsGet<IntervalsProjectResponse>(`/project/?limit=${PAGE_SIZE}&page=1`);
-  const total = first.listcount ?? 0;
-  const raw = first.project;
-  const firstPage = Array.isArray(raw) ? raw : raw ? [raw] : [];
-
-  if (total <= PAGE_SIZE) return firstPage;
-
-  const totalPages = Math.ceil(total / PAGE_SIZE);
-  const remaining: IntervalsProject[][] = [];
-  for (let page = 2; page <= totalPages; page++) {
-    const d = await intervalsGet<IntervalsProjectResponse>(`/project/?limit=${PAGE_SIZE}&page=${page}`);
-    const r = d.project;
-    remaining.push(Array.isArray(r) ? r : r ? [r] : []);
-  }
-
-  return [firstPage, ...remaining].flat();
+  // /project/ does not support `page` — use a limit large enough for all records
+  const data = await intervalsGet<IntervalsProjectResponse>(`/project/?limit=2000`);
+  const raw = data.project;
+  return Array.isArray(raw) ? raw : raw ? [raw] : [];
 }
 
 export async function syncProjects(): Promise<{ synced: number; errors: string[] }> {

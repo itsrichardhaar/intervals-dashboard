@@ -16,26 +16,27 @@ interface IntervalsTimeResponse {
 }
 
 async function fetchAllTimeEntries(): Promise<IntervalsTimeEntry[]> {
-  const PAGE_SIZE = 500;
-  // Cap at 60 pages (30,000 entries) to stay within the 60-second function timeout
-  const MAX_PAGES = 60;
+  const LIMIT = 1000;
+  // Cap at 30,000 entries per run to stay within the 60s function timeout
+  const MAX_ENTRIES = 30000;
 
-  const first = await intervalsGet<IntervalsTimeResponse>(`/time/?limit=${PAGE_SIZE}&page=1`);
+  const first = await intervalsGet<IntervalsTimeResponse>(`/time/?limit=${LIMIT}&offset=0`);
   const total = first.listcount ?? 0;
   const raw = first.time;
-  const firstPage = Array.isArray(raw) ? raw : raw ? [raw] : [];
+  const firstPage: IntervalsTimeEntry[] = Array.isArray(raw) ? raw : raw ? [raw] : [];
 
-  if (total <= PAGE_SIZE) return firstPage;
+  if (total <= LIMIT) return firstPage;
 
-  const totalPages = Math.min(Math.ceil(total / PAGE_SIZE), MAX_PAGES);
-  const remaining: IntervalsTimeEntry[][] = [];
-  for (let page = 2; page <= totalPages; page++) {
-    const d = await intervalsGet<IntervalsTimeResponse>(`/time/?limit=${PAGE_SIZE}&page=${page}`);
+  const totalToFetch = Math.min(total, MAX_ENTRIES);
+  const allEntries = [...firstPage];
+
+  for (let offset = LIMIT; offset < totalToFetch; offset += LIMIT) {
+    const d = await intervalsGet<IntervalsTimeResponse>(`/time/?limit=${LIMIT}&offset=${offset}`);
     const r = d.time;
-    remaining.push(Array.isArray(r) ? r : r ? [r] : []);
+    allEntries.push(...(Array.isArray(r) ? r : r ? [r] : []));
   }
 
-  return [firstPage, ...remaining].flat();
+  return allEntries;
 }
 
 export async function syncTimeEntries(): Promise<{ synced: number; errors: string[] }> {
@@ -77,7 +78,7 @@ export async function syncTimeEntries(): Promise<{ synced: number; errors: strin
     );
   }
 
-  // Recompute loggedHours for all tasks from the full DB (not just this batch)
+  // Recompute loggedHours for all tasks from the full DB
   const grouped = await prisma.intervalsTimeEntry.groupBy({
     by: ["taskId"],
     where: { taskId: { not: null } },

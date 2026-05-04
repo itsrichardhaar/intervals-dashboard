@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.0.16] - 2026-05-04
+
+### Fixed
+- Sync: Intervals API does not support `page` parameter on any endpoint — replaced with single high-limit requests (projects: 2000, tasks: 3000, people: 1000) and offset-based pagination for time entries
+- Sync: time-entries now uses `offset` instead of `page` for pagination, capped at 30k entries per run
+
+---
+
 ## [0.0.15] - 2026-05-04
 
 ### Fixed
