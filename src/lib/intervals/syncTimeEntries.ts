@@ -74,13 +74,16 @@ export async function syncTimeEntries(): Promise<{ synced: number; errors: strin
     _sum: { hours: true },
   });
 
-  await Promise.all(
-    grouped.map(({ taskId, _sum }) =>
-      taskId
-        ? prisma.intervalsTask.update({ where: { id: taskId }, data: { loggedHours: _sum.hours ?? 0 } })
-        : Promise.resolve()
-    )
-  );
+  const BATCH = 10;
+  for (let i = 0; i < grouped.length; i += BATCH) {
+    await Promise.all(
+      grouped.slice(i, i + BATCH).map(({ taskId, _sum }) =>
+        taskId
+          ? prisma.intervalsTask.update({ where: { id: taskId }, data: { loggedHours: _sum.hours ?? 0 } })
+          : Promise.resolve()
+      )
+    );
+  }
 
   return { synced: result.count, errors: [] };
 }

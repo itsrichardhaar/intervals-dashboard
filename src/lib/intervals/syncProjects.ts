@@ -27,7 +27,7 @@ export async function syncProjects(): Promise<{ synced: number; errors: string[]
   const projects = await fetchAllProjects();
   let synced = 0;
   const errors: string[] = [];
-  const BATCH = 5;
+  const BATCH = 10;
 
   for (let i = 0; i < projects.length; i += BATCH) {
     const batch = projects.slice(i, i + BATCH);
