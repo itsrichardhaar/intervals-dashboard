@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.0.15] - 2026-05-04
+
+### Fixed
+- Sync: fetch pages sequentially (not parallel) across all 4 resources to stay under 100 req/min Intervals rate limit
+- Sync: stagger cron schedules by 2-3 minutes so all 4 jobs don't fire simultaneously
+
+---
+
 ## [0.0.14] - 2026-05-04
 
 ### Fixed

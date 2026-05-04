@@ -28,12 +28,12 @@ async function fetchAllTimeEntries(): Promise<IntervalsTimeEntry[]> {
   if (total <= PAGE_SIZE) return firstPage;
 
   const totalPages = Math.min(Math.ceil(total / PAGE_SIZE), MAX_PAGES);
-  const remaining = await Promise.all(
-    Array.from({ length: totalPages - 1 }, (_, i) =>
-      intervalsGet<IntervalsTimeResponse>(`/time/?limit=${PAGE_SIZE}&page=${i + 2}`)
-        .then((d) => { const r = d.time; return Array.isArray(r) ? r : r ? [r] : []; })
-    )
-  );
+  const remaining: IntervalsTimeEntry[][] = [];
+  for (let page = 2; page <= totalPages; page++) {
+    const d = await intervalsGet<IntervalsTimeResponse>(`/time/?limit=${PAGE_SIZE}&page=${page}`);
+    const r = d.time;
+    remaining.push(Array.isArray(r) ? r : r ? [r] : []);
+  }
 
   return [firstPage, ...remaining].flat();
 }

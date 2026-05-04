@@ -23,12 +23,12 @@ async function fetchAllPeople(): Promise<IntervalsPerson[]> {
   if (total <= PAGE_SIZE) return firstPage;
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
-  const remaining = await Promise.all(
-    Array.from({ length: totalPages - 1 }, (_, i) =>
-      intervalsGet<IntervalsPersonResponse>(`/person/?limit=${PAGE_SIZE}&page=${i + 2}`)
-        .then((d) => { const r = d.person; return Array.isArray(r) ? r : r ? [r] : []; })
-    )
-  );
+  const remaining: IntervalsPerson[][] = [];
+  for (let page = 2; page <= totalPages; page++) {
+    const d = await intervalsGet<IntervalsPersonResponse>(`/person/?limit=${PAGE_SIZE}&page=${page}`);
+    const r = d.person;
+    remaining.push(Array.isArray(r) ? r : r ? [r] : []);
+  }
 
   return [firstPage, ...remaining].flat();
 }

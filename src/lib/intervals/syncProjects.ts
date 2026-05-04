@@ -26,12 +26,12 @@ async function fetchAllProjects(): Promise<IntervalsProject[]> {
   if (total <= PAGE_SIZE) return firstPage;
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
-  const remaining = await Promise.all(
-    Array.from({ length: totalPages - 1 }, (_, i) =>
-      intervalsGet<IntervalsProjectResponse>(`/project/?limit=${PAGE_SIZE}&page=${i + 2}`)
-        .then((d) => { const r = d.project; return Array.isArray(r) ? r : r ? [r] : []; })
-    )
-  );
+  const remaining: IntervalsProject[][] = [];
+  for (let page = 2; page <= totalPages; page++) {
+    const d = await intervalsGet<IntervalsProjectResponse>(`/project/?limit=${PAGE_SIZE}&page=${page}`);
+    const r = d.project;
+    remaining.push(Array.isArray(r) ? r : r ? [r] : []);
+  }
 
   return [firstPage, ...remaining].flat();
 }
