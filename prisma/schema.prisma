@@ -1,0 +1,256 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+// ─── Auth (NextAuth) ──────────────────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  password      String?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts              Account[]
+  sessions              Session[]
+  intervalsMapping      UserIntervalsMapping?
+  weeklyStatusUpdates   WeeklyStatusUpdate[]
+  actionItemsCreated    ActionItem[]          @relation("ActionItemCreatedBy")
+  actionItemsAssigned   ActionItem[]          @relation("ActionItemAssignedTo")
+  projectStatusOverrides ProjectStatusOverride[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ─── Intervals Synced Data ───────────────────────────────────────────────────
+
+model IntervalsPerson {
+  id          String   @id @default(cuid())
+  intervalsId String   @unique
+  name        String
+  email       String?
+  active      Boolean  @default(true)
+  syncedAt    DateTime @default(now())
+
+  tasks         IntervalsTask[]
+  timeEntries   IntervalsTimeEntry[]
+  mapping       UserIntervalsMapping?
+}
+
+model IntervalsProject {
+  id              String   @id @default(cuid())
+  intervalsId     String   @unique
+  name            String
+  clientName      String?
+  status          String
+  estimatedHours  Float?
+  budgetAmount    Float?
+  startDate       DateTime?
+  dueDate         DateTime?
+  syncedAt        DateTime @default(now())
+
+  tasks                  IntervalsTask[]
+  timeEntries            IntervalsTimeEntry[]
+  milestones             IntervalsMilestone[]
+  documents              IntervalsDocument[]
+  projectNotes           IntervalsProjectNote[]
+  weeklyStatusUpdates    WeeklyStatusUpdate[]
+  actionItems            ActionItem[]
+  projectStatusOverride  ProjectStatusOverride?
+}
+
+model IntervalsTask {
+  id              String   @id @default(cuid())
+  intervalsId     String   @unique
+  title           String
+  projectId       String
+  assigneeId      String?
+  status          String
+  estimatedHours  Float?
+  loggedHours     Float    @default(0)
+  dueDate         DateTime?
+  syncedAt        DateTime @default(now())
+
+  project     IntervalsProject  @relation(fields: [projectId], references: [id])
+  assignee    IntervalsPerson?  @relation(fields: [assigneeId], references: [id])
+  timeEntries IntervalsTimeEntry[]
+  taskNotes   IntervalsTaskNote[]
+  actionItems ActionItem[]
+}
+
+model IntervalsTimeEntry {
+  id          String   @id @default(cuid())
+  intervalsId String   @unique
+  taskId      String?
+  personId    String?
+  projectId   String?
+  hours       Float
+  date        DateTime
+  syncedAt    DateTime @default(now())
+
+  task    IntervalsTask?    @relation(fields: [taskId], references: [id])
+  person  IntervalsPerson?  @relation(fields: [personId], references: [id])
+  project IntervalsProject? @relation(fields: [projectId], references: [id])
+}
+
+model IntervalsMilestone {
+  id          String   @id @default(cuid())
+  intervalsId String   @unique
+  projectId   String
+  title       String
+  dueDate     DateTime?
+  completed   Boolean  @default(false)
+  syncedAt    DateTime @default(now())
+
+  project IntervalsProject @relation(fields: [projectId], references: [id])
+}
+
+model IntervalsDocument {
+  id          String   @id @default(cuid())
+  intervalsId String   @unique
+  projectId   String
+  title       String
+  url         String?
+  syncedAt    DateTime @default(now())
+
+  project IntervalsProject @relation(fields: [projectId], references: [id])
+}
+
+model IntervalsTaskNote {
+  id          String   @id @default(cuid())
+  intervalsId String   @unique
+  taskId      String
+  note        String
+  syncedAt    DateTime @default(now())
+
+  task IntervalsTask @relation(fields: [taskId], references: [id])
+}
+
+model IntervalsProjectNote {
+  id          String   @id @default(cuid())
+  intervalsId String   @unique
+  projectId   String
+  note        String
+  syncedAt    DateTime @default(now())
+
+  project IntervalsProject @relation(fields: [projectId], references: [id])
+}
+
+// ─── User–Intervals Mapping ──────────────────────────────────────────────────
+
+model UserIntervalsMapping {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  intervalsPersonId String   @unique
+  matchType        String   // "auto" | "manual"
+  createdAt        DateTime @default(now())
+
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  intervalsPerson IntervalsPerson @relation(fields: [intervalsPersonId], references: [id])
+}
+
+// ─── Dashboard-Only Data ─────────────────────────────────────────────────────
+
+model WeeklyStatusUpdate {
+  id        String   @id @default(cuid())
+  projectId String
+  status    String   // "on_track" | "at_risk" | "blocked"
+  summary   String
+  authorId  String
+  createdAt DateTime @default(now())
+
+  project IntervalsProject @relation(fields: [projectId], references: [id])
+  author  User             @relation(fields: [authorId], references: [id])
+}
+
+model ActionItem {
+  id            String    @id @default(cuid())
+  description   String
+  projectId     String?
+  taskId        String?
+  assigneeId    String
+  createdById   String
+  dueDate       DateTime?
+  completedAt   DateTime?
+  createdAt     DateTime  @default(now())
+
+  project   IntervalsProject? @relation(fields: [projectId], references: [id])
+  task      IntervalsTask?    @relation(fields: [taskId], references: [id])
+  assignee  User              @relation("ActionItemAssignedTo", fields: [assigneeId], references: [id])
+  createdBy User              @relation("ActionItemCreatedBy", fields: [createdById], references: [id])
+}
+
+model ProjectStatusOverride {
+  id        String   @id @default(cuid())
+  projectId String   @unique
+  status    String   // "on_track" | "at_risk" | "blocked"
+  reason    String?
+  setById   String
+  setAt     DateTime @default(now())
+
+  project IntervalsProject @relation(fields: [projectId], references: [id])
+  setBy   User             @relation(fields: [setById], references: [id])
+}
+
+// ─── Sync Log ────────────────────────────────────────────────────────────────
+
+model SyncLog {
+  id               String    @id @default(cuid())
+  startedAt        DateTime  @default(now())
+  completedAt      DateTime?
+  status           String    // "running" | "success" | "partial" | "failed"
+  resourcesSynced  String[]
+  errorMessage     String?
+}
+
+// ─── Email Sent Log ──────────────────────────────────────────────────────────
+
+model EmailSentLog {
+  id        String   @id @default(cuid())
+  taskId    String?
+  projectId String?
+  userId    String?
+  alertType String   // "overdue" | "due_tomorrow" | "budget_warning" | "flagged_task" | "monday_digest"
+  sentAt    DateTime @default(now())
+
+  @@index([taskId, alertType])
+  @@index([projectId, alertType])
+}
