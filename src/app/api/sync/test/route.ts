@@ -10,17 +10,19 @@ export async function GET(req: NextRequest) {
   const credentials = Buffer.from(`${token}:x`).toString("base64");
   const headers = { Authorization: `Basic ${credentials}`, Accept: "application/json" };
 
-  const [personRes, projectPage2Res, taskPage2Res, timeRes] = await Promise.all([
-    fetch("https://api.myintervals.com/person/?limit=5", { headers }).then(r => r.json()),
-    fetch("https://api.myintervals.com/project/?limit=5&page=2", { headers }).then(r => r.json()),
-    fetch("https://api.myintervals.com/task/?limit=5&page=2", { headers }).then(r => r.json()),
-    fetch("https://api.myintervals.com/time/?limit=5&page=2", { headers }).then(r => r.json()),
+  const [offsetProject, offsetTask, offsetTime, highLimitProject, highLimitTask] = await Promise.all([
+    fetch("https://api.myintervals.com/project/?limit=5&offset=5", { headers }).then(r => r.json()),
+    fetch("https://api.myintervals.com/task/?limit=5&offset=5", { headers }).then(r => r.json()),
+    fetch("https://api.myintervals.com/time/?limit=5&offset=5", { headers }).then(r => r.json()),
+    fetch("https://api.myintervals.com/project/?limit=2000", { headers }).then(r => r.json()),
+    fetch("https://api.myintervals.com/task/?limit=3000", { headers }).then(r => r.json()),
   ]);
 
   return NextResponse.json({
-    person_no_page: { error: personRes.error ?? null, hasData: !!personRes.person },
-    project_page2: { error: projectPage2Res.error ?? null, hasData: !!projectPage2Res.project },
-    task_page2: { error: taskPage2Res.error ?? null, hasData: !!taskPage2Res.task },
-    time_page2: { error: timeRes.error ?? null, hasData: !!timeRes.time },
+    project_offset: { error: offsetProject.error ?? null, hasData: !!offsetProject.project, listcount: offsetProject.listcount },
+    task_offset: { error: offsetTask.error ?? null, hasData: !!offsetTask.task },
+    time_offset: { error: offsetTime.error ?? null, hasData: !!offsetTime.time },
+    project_limit2000: { error: highLimitProject.error ?? null, listcount: highLimitProject.listcount, count: Array.isArray(highLimitProject.project) ? highLimitProject.project.length : (highLimitProject.project ? 1 : 0) },
+    task_limit3000: { error: highLimitTask.error ?? null, listcount: highLimitTask.listcount, count: Array.isArray(highLimitTask.task) ? highLimitTask.task.length : (highLimitTask.task ? 1 : 0) },
   });
 }
