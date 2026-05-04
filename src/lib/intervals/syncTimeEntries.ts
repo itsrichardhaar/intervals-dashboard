@@ -11,16 +11,35 @@ interface IntervalsTimeEntry {
 }
 
 interface IntervalsTimeResponse {
+  listcount: number;
   time: IntervalsTimeEntry | IntervalsTimeEntry[];
 }
 
-export async function syncTimeEntries(): Promise<{ synced: number; errors: string[] }> {
-  const year = new Date().getFullYear();
-  const data = await intervalsGet<IntervalsTimeResponse>(
-    `/time/?limit=1000&datestart=${year}-01-01`
+async function fetchAllTimeEntries(): Promise<IntervalsTimeEntry[]> {
+  const PAGE_SIZE = 500;
+  // Cap at 60 pages (30,000 entries) to stay within the 60-second function timeout
+  const MAX_PAGES = 60;
+
+  const first = await intervalsGet<IntervalsTimeResponse>(`/time/?limit=${PAGE_SIZE}&page=1`);
+  const total = first.listcount ?? 0;
+  const raw = first.time;
+  const firstPage = Array.isArray(raw) ? raw : raw ? [raw] : [];
+
+  if (total <= PAGE_SIZE) return firstPage;
+
+  const totalPages = Math.min(Math.ceil(total / PAGE_SIZE), MAX_PAGES);
+  const remaining = await Promise.all(
+    Array.from({ length: totalPages - 1 }, (_, i) =>
+      intervalsGet<IntervalsTimeResponse>(`/time/?limit=${PAGE_SIZE}&page=${i + 2}`)
+        .then((d) => { const r = d.time; return Array.isArray(r) ? r : r ? [r] : []; })
+    )
   );
-  const raw = data.time;
-  const entries = Array.isArray(raw) ? raw : raw ? [raw] : [];
+
+  return [firstPage, ...remaining].flat();
+}
+
+export async function syncTimeEntries(): Promise<{ synced: number; errors: string[] }> {
+  const entries = await fetchAllTimeEntries();
 
   // Pre-fetch FK maps in bulk
   const [tasks, people, projects] = await Promise.all([
@@ -34,7 +53,6 @@ export async function syncTimeEntries(): Promise<{ synced: number; errors: strin
 
   let synced = 0;
   const errors: string[] = [];
-  const loggedHoursMap = new Map<string, number>();
   const BATCH = 20;
 
   for (let i = 0; i < entries.length; i += BATCH) {
@@ -51,7 +69,6 @@ export async function syncTimeEntries(): Promise<{ synced: number; errors: strin
             update: { taskId, personId, projectId, hours, date: new Date(entry.date), syncedAt: new Date() },
             create: { intervalsId: String(entry.id), taskId, personId, projectId, hours, date: new Date(entry.date) },
           });
-          if (taskId) loggedHoursMap.set(taskId, (loggedHoursMap.get(taskId) ?? 0) + hours);
           synced++;
         } catch (err) {
           errors.push(`TimeEntry ${entry.id}: ${String(err)}`);
@@ -60,10 +77,18 @@ export async function syncTimeEntries(): Promise<{ synced: number; errors: strin
     );
   }
 
-  // Bulk update loggedHours on tasks concurrently
+  // Recompute loggedHours for all tasks from the full DB (not just this batch)
+  const grouped = await prisma.intervalsTimeEntry.groupBy({
+    by: ["taskId"],
+    where: { taskId: { not: null } },
+    _sum: { hours: true },
+  });
+
   await Promise.all(
-    Array.from(loggedHoursMap.entries()).map(([taskId, hours]) =>
-      prisma.intervalsTask.update({ where: { id: taskId }, data: { loggedHours: hours } })
+    grouped.map(({ taskId, _sum }) =>
+      taskId
+        ? prisma.intervalsTask.update({ where: { id: taskId }, data: { loggedHours: _sum.hours ?? 0 } })
+        : Promise.resolve()
     )
   );
 

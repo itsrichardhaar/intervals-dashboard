@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.0.14] - 2026-05-04
+
+### Fixed
+- Sync time-entries: removed invalid `datestart` filter causing 400 from Intervals API
+- Sync time-entries: added full pagination (capped at 30,000 entries to stay within 60s timeout)
+- Sync time-entries: recompute `loggedHours` via DB `groupBy` after all upserts (avoids N+1 race)
+
+---
+
 ## [0.0.13] - 2026-05-04
 
 ### Fixed
