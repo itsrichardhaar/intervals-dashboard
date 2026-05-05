@@ -18,8 +18,8 @@ interface IntervalsTimeResponse {
 async function fetchAllTimeEntries(): Promise<IntervalsTimeEntry[]> {
   // Use larger pages to reduce API round-trips (fewer calls = faster)
   const LIMIT = 2000;
-  // Cap at 30,000 entries per run to stay within the 60s function timeout
-  const MAX_ENTRIES = 30000;
+  // Cap at 10,000 entries per run — cron runs every 15 min so history builds up gradually
+  const MAX_ENTRIES = 10000;
 
   const first = await intervalsGet<IntervalsTimeResponse>(`/time/?limit=${LIMIT}&offset=0`);
   const total = first.listcount ?? 0;
