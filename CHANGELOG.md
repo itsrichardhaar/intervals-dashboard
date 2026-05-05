@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.0.18] - 2026-05-04
+
+### Fixed
+- Sync time-entries: reduce per-run cap to 10k entries (5 API calls) to fit within 60s timeout; history builds up across cron runs
+
+---
+
 ## [0.0.17] - 2026-05-04
 
 ### Changed
