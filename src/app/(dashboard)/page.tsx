@@ -160,7 +160,7 @@ export default async function HomePage({
   const rawTasks = mapping
     ? await prisma.intervalsTask.findMany({
         where: { assigneeId: mapping.intervalsPersonId },
-        include: { project: { select: { name: true } } },
+        include: { project: { select: { id: true, name: true, clientName: true } } },
         orderBy: { dueDate: "asc" },
       })
     : [];
@@ -203,7 +203,21 @@ export default async function HomePage({
       return a.dueDate.getTime() - b.dueDate.getTime();
     });
 
-  // ── 6. Fetch action items ───────────────────────────────────────────────────
+  // ── 6. Derive active projects from tasks ───────────────────────────────────
+  const OPEN_STATUSES = new Set(["open", "in progress", "in_progress", "in internal review", "in_internal_review", "in client review", "in_client_review"]);
+  const activeProjectMap = new Map<string, { id: string; name: string; clientName: string | null; openTaskCount: number }>();
+  for (const t of rawTasks) {
+    if (!OPEN_STATUSES.has(t.status.toLowerCase())) continue;
+    const existing = activeProjectMap.get(t.project.id);
+    if (existing) {
+      existing.openTaskCount++;
+    } else {
+      activeProjectMap.set(t.project.id, { id: t.project.id, name: t.project.name, clientName: t.project.clientName, openTaskCount: 1 });
+    }
+  }
+  const activeProjects = Array.from(activeProjectMap.values()).sort((a, b) => a.name.localeCompare(b.name));
+
+  // ── 7. Fetch action items ───────────────────────────────────────────────────
   const actionItems = await prisma.actionItem.findMany({
     where: { assigneeId: userId, completedAt: null },
     include: { project: { select: { name: true } } },
@@ -212,6 +226,7 @@ export default async function HomePage({
 
   const weekStart = startOfCurrentWeek();
   const now = new Date();
+  // actionItems now referenced below (renamed from step 6 → step 7, no code change needed)
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
@@ -392,6 +407,43 @@ export default async function HomePage({
               </table>
             </div>
           )}
+        </section>
+      )}
+
+      {/* ── My Active Projects ── */}
+      {mapping && activeProjects.length > 0 && (
+        <section>
+          <h2 className="text-sm font-medium text-gray-400 uppercase tracking-wide mb-3">
+            My Active Projects
+          </h2>
+          <div className="rounded-lg border border-gray-800 overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-900">
+                <tr>
+                  <th className="text-left px-4 py-3 text-gray-400 font-medium">Project</th>
+                  <th className="text-left px-4 py-3 text-gray-400 font-medium hidden sm:table-cell">Client</th>
+                  <th className="text-right px-4 py-3 text-gray-400 font-medium">Open Tasks</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-800">
+                {activeProjects.map((p) => (
+                  <tr key={p.id} className="bg-gray-950 hover:bg-gray-900 transition-colors">
+                    <td className="px-4 py-3">
+                      <Link href={`/projects/${p.id}`} className="text-white font-medium hover:text-blue-300 transition-colors">
+                        {p.name}
+                      </Link>
+                    </td>
+                    <td className="px-4 py-3 text-gray-400 hidden sm:table-cell">
+                      {p.clientName ?? <span className="text-gray-700">—</span>}
+                    </td>
+                    <td className="px-4 py-3 text-right text-gray-400 tabular-nums">
+                      {p.openTaskCount}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </section>
       )}
 

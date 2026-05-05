@@ -3,6 +3,7 @@ import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { calculateProjectStatus } from "@/lib/calculators/projectStatus";
+import { calculateBandwidth, type TaskInput, type TaskStatus } from "@/lib/calculators/bandwidth";
 import { isCarriedOver, isActionItemOverdue } from "@/lib/actionItems";
 import ProjectStatusControl from "@/components/ProjectStatusControl";
 import CompleteActionItemButton from "@/components/CompleteActionItemButton";
@@ -127,6 +128,56 @@ export default async function ProjectDetailPage({
 
   const isArchived = project.status === "inactive";
 
+  // ── Per-assignee bandwidth ────────────────────────────────────────────────
+  const assigneeIds = [
+    ...new Set(project.tasks.map((t) => t.assigneeId).filter(Boolean)),
+  ] as string[];
+
+  const [allAssigneeTasks, assigneeMappings] = await Promise.all([
+    assigneeIds.length > 0
+      ? prisma.intervalsTask.findMany({
+          where: { assigneeId: { in: assigneeIds } },
+          select: {
+            id: true,
+            assigneeId: true,
+            status: true,
+            estimatedHours: true,
+            loggedHours: true,
+            dueDate: true,
+            project: { select: { name: true } },
+          },
+        })
+      : Promise.resolve([]),
+    assigneeIds.length > 0
+      ? prisma.userIntervalsMapping.findMany({
+          where: { intervalsPersonId: { in: assigneeIds } },
+          select: { intervalsPersonId: true },
+        })
+      : Promise.resolve([]),
+  ]);
+
+  const linkedPersonIds = new Set(assigneeMappings.map((m) => m.intervalsPersonId));
+  const bandwidthByAssignee = new Map<string, number | null>();
+  for (const personId of assigneeIds) {
+    if (!linkedPersonIds.has(personId)) {
+      bandwidthByAssignee.set(personId, null);
+      continue;
+    }
+    const personTasks: TaskInput[] = allAssigneeTasks
+      .filter((t) => t.assigneeId === personId)
+      .map((t) => ({
+        id: t.id,
+        title: "",
+        projectName: t.project.name,
+        status: (normalizeStatus(t.status) as TaskStatus) ?? "open",
+        estimatedHours: t.estimatedHours,
+        loggedHours: t.loggedHours,
+        dueDate: t.dueDate,
+      }));
+    const { bandwidthPercent } = calculateBandwidth(personTasks, "weekly");
+    bandwidthByAssignee.set(personId, bandwidthPercent);
+  }
+
   // ── Compute status ────────────────────────────────────────────────────────
   const totalEstimated = project.tasks.reduce(
     (s, t) => s + (t.estimatedHours ?? 0),
@@ -151,7 +202,7 @@ export default async function ProjectDetailPage({
 
   // ── Group tasks by assignee ───────────────────────────────────────────────
   const unassigned: typeof project.tasks = [];
-  const byAssignee = new Map<string, { name: string; tasks: typeof project.tasks }>();
+  const byAssignee = new Map<string, { name: string; personId: string; tasks: typeof project.tasks }>();
 
   for (const task of project.tasks) {
     if (!task.assignee) {
@@ -163,6 +214,7 @@ export default async function ProjectDetailPage({
       } else {
         byAssignee.set(task.assignee.id, {
           name: task.assignee.name,
+          personId: task.assignee.id,
           tasks: [task],
         });
       }
@@ -174,7 +226,7 @@ export default async function ProjectDetailPage({
     a.name.localeCompare(b.name)
   );
   if (unassigned.length > 0) {
-    assigneeGroups.push({ name: "Unassigned", tasks: unassigned });
+    assigneeGroups.push({ name: "Unassigned", personId: "", tasks: unassigned });
   }
 
   const budgetPct =
@@ -267,11 +319,26 @@ export default async function ProjectDetailPage({
           <div className="space-y-4">
             {assigneeGroups.map((group) => (
               <div key={group.name} className="rounded-lg border border-gray-800 overflow-hidden">
-                <div className="bg-gray-900 px-4 py-2.5 border-b border-gray-800">
-                  <span className="text-sm font-medium text-gray-300">{group.name}</span>
-                  <span className="ml-2 text-xs text-gray-600">
-                    {group.tasks.length} task{group.tasks.length !== 1 ? "s" : ""}
-                  </span>
+                <div className="bg-gray-900 px-4 py-2.5 border-b border-gray-800 flex items-center justify-between gap-4">
+                  <div>
+                    <span className="text-sm font-medium text-gray-300">{group.name}</span>
+                    <span className="ml-2 text-xs text-gray-600">
+                      {group.tasks.length} task{group.tasks.length !== 1 ? "s" : ""}
+                    </span>
+                  </div>
+                  {group.personId && (() => {
+                    const bw = bandwidthByAssignee.get(group.personId);
+                    if (bw === undefined) return null;
+                    if (bw === null) return (
+                      <span className="text-xs text-gray-600">Not linked</span>
+                    );
+                    const color = bw >= 90 ? "text-red-400" : bw >= 70 ? "text-yellow-400" : "text-green-400";
+                    return (
+                      <span className={`text-xs font-medium tabular-nums ${color}`}>
+                        {bw}% bandwidth
+                      </span>
+                    );
+                  })()}
                 </div>
                 <table className="w-full text-sm">
                   <tbody className="divide-y divide-gray-800">

@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.6] - 2026-05-05
+
+### Added
+- Personal Home: "My Active Projects" section listing active projects with open task counts, derived from task assignments — closes #34
+- Project Overview: "Team" column with initials chips (deterministic color, +N overflow) for assignees with open tasks — closes #35
+- Project Overview: "Next Milestone" column showing earliest upcoming incomplete milestone title and due date — closes #35
+- Project Detail: per-assignee bandwidth % shown in each task group header (green/yellow/red thresholds; "Not linked" for unmapped persons) — closes #36
+- Settings: inline "Edit" button on each team member row opens a dropdown to reassign or remove their Intervals person mapping — closes #37
+- `GET /api/intervals-people` endpoint returns all active IntervalsPeople for the settings dropdown
+- `PUT /api/users/[id]/mapping` endpoint upserts or removes a user's Intervals mapping with `matchType: "manual"`
+
+### Security
+- Mapping PUT endpoint validates `intervalsPersonId` type at runtime and rejects empty strings with 400
+- Invite POST endpoint now trims/lowercases email and validates format before DB insert
+
+Closes #34, #35, #36, #37
+
+---
+
 ## [0.1.5] - 2026-05-05
 
 ### Added

@@ -2,6 +2,12 @@
 
 import { useState, useEffect, useCallback } from "react";
 
+interface IntervalsPerson {
+  id: string;
+  name: string;
+  email: string | null;
+}
+
 interface UserRecord {
   id: string;
   name: string | null;
@@ -13,8 +19,96 @@ interface UserRecord {
   } | null;
 }
 
+function MappingCell({
+  user,
+  people,
+  onSaved,
+}: {
+  user: UserRecord;
+  people: IntervalsPerson[];
+  onSaved: (userId: string, mapping: UserRecord["intervalsMapping"]) => void;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [selected, setSelected] = useState<string>("");
+  const [saving, setSaving] = useState(false);
+
+  async function save() {
+    setSaving(true);
+    const res = await fetch(`/api/users/${user.id}/mapping`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ intervalsPersonId: selected || null }),
+    });
+    setSaving(false);
+    if (!res.ok) return;
+
+    const chosenPerson = people.find((p) => p.id === selected) ?? null;
+    onSaved(user.id, chosenPerson ? { matchType: "manual", intervalsPerson: { name: chosenPerson.name } } : null);
+    setEditing(false);
+    setSelected("");
+  }
+
+  if (!editing) {
+    return (
+      <div className="flex items-center gap-2">
+        {user.intervalsMapping ? (
+          <span className="text-green-400 text-xs">
+            {user.intervalsMapping.matchType === "auto" ? "Auto" : "Manual"} →{" "}
+            {user.intervalsMapping.intervalsPerson?.name}
+          </span>
+        ) : (
+          <span className="text-yellow-500 text-xs">Not linked</span>
+        )}
+        <button
+          onClick={() => {
+            setSelected(
+              people.find((p) => p.name === user.intervalsMapping?.intervalsPerson?.name)?.id ?? ""
+            );
+            setEditing(true);
+          }}
+          className="text-xs text-gray-600 hover:text-gray-400 transition-colors ml-1"
+        >
+          Edit
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <select
+        value={selected}
+        onChange={(e) => setSelected(e.target.value)}
+        className="text-xs bg-gray-800 border border-gray-600 rounded px-2 py-1 text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+      >
+        <option value="">— No mapping —</option>
+        {people.map((p) => (
+          <option key={p.id} value={p.id}>
+            {p.name}
+            {p.email ? ` (${p.email})` : ""}
+          </option>
+        ))}
+      </select>
+      <button
+        onClick={save}
+        disabled={saving}
+        className="text-xs px-2 py-1 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 text-white rounded transition-colors"
+      >
+        {saving ? "…" : "Save"}
+      </button>
+      <button
+        onClick={() => { setEditing(false); setSelected(""); }}
+        className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+      >
+        Cancel
+      </button>
+    </div>
+  );
+}
+
 export default function SettingsPage() {
   const [users, setUsers] = useState<UserRecord[]>([]);
+  const [people, setPeople] = useState<IntervalsPerson[]>([]);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
@@ -29,6 +123,9 @@ export default function SettingsPage() {
 
   useEffect(() => {
     fetchUsers();
+    fetch("/api/intervals-people")
+      .then((r) => r.json())
+      .then((d) => { if (d.people) setPeople(d.people); });
   }, [fetchUsers]);
 
   async function handleInvite(e: React.FormEvent) {
@@ -54,6 +151,12 @@ export default function SettingsPage() {
       setEmail("");
       fetchUsers();
     }
+  }
+
+  function handleMappingSaved(userId: string, mapping: UserRecord["intervalsMapping"]) {
+    setUsers((prev) =>
+      prev.map((u) => (u.id === userId ? { ...u, intervalsMapping: mapping } : u))
+    );
   }
 
   return (
@@ -123,14 +226,7 @@ export default function SettingsPage() {
                   <td className="px-4 py-3 text-white">{user.name ?? "—"}</td>
                   <td className="px-4 py-3 text-gray-300">{user.email}</td>
                   <td className="px-4 py-3">
-                    {user.intervalsMapping ? (
-                      <span className="text-green-400 text-xs">
-                        {user.intervalsMapping.matchType === "auto" ? "Auto" : "Manual"} →{" "}
-                        {user.intervalsMapping.intervalsPerson?.name}
-                      </span>
-                    ) : (
-                      <span className="text-yellow-500 text-xs">Not linked</span>
-                    )}
+                    <MappingCell user={user} people={people} onSaved={handleMappingSaved} />
                   </td>
                 </tr>
               ))}

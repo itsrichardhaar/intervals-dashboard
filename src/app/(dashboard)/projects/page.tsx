@@ -54,6 +54,52 @@ function timeAgo(date: Date): string {
   return `${weeks}w ago`;
 }
 
+// Deterministic color from name string
+function nameColor(name: string): string {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
+  const palette = [
+    "bg-blue-800 text-blue-200",
+    "bg-purple-800 text-purple-200",
+    "bg-green-800 text-green-200",
+    "bg-rose-800 text-rose-200",
+    "bg-orange-800 text-orange-200",
+    "bg-teal-800 text-teal-200",
+    "bg-pink-800 text-pink-200",
+    "bg-indigo-800 text-indigo-200",
+  ];
+  return palette[h % palette.length];
+}
+
+function initials(name: string): string {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+  return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+}
+
+function TeamChips({ members }: { members: string[] }) {
+  const shown = members.slice(0, 4);
+  const overflow = members.length - 4;
+  return (
+    <div className="flex items-center gap-1">
+      {shown.map((name) => (
+        <span
+          key={name}
+          title={name}
+          className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium ${nameColor(name)}`}
+        >
+          {initials(name)}
+        </span>
+      ))}
+      {overflow > 0 && (
+        <span className="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium bg-gray-700 text-gray-300">
+          +{overflow}
+        </span>
+      )}
+    </div>
+  );
+}
+
 export default async function ProjectsPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
@@ -77,6 +123,12 @@ export default async function ProjectsPage() {
         orderBy: { createdAt: "desc" },
         take: 1,
         include: { author: { select: { name: true } } },
+      },
+      milestones: {
+        where: { completed: false },
+        orderBy: { dueDate: "asc" },
+        take: 1,
+        select: { title: true, dueDate: true },
       },
     },
   });
@@ -102,6 +154,7 @@ export default async function ProjectsPage() {
     }
 
     const latestUpdate = p.weeklyStatusUpdates[0] ?? null;
+    const nextMilestone = p.milestones[0] ?? null;
 
     return {
       ...p,
@@ -112,6 +165,7 @@ export default async function ProjectsPage() {
       blockedReason: override?.reason ?? null,
       teamMembers: Array.from(memberMap.values()),
       latestUpdate,
+      nextMilestone,
     };
   });
 
@@ -140,6 +194,12 @@ export default async function ProjectsPage() {
               </th>
               <th className="text-left px-4 py-3 text-gray-400 font-medium hidden xl:table-cell">
                 Latest Update
+              </th>
+              <th className="text-left px-4 py-3 text-gray-400 font-medium hidden 2xl:table-cell">
+                Next Milestone
+              </th>
+              <th className="text-left px-4 py-3 text-gray-400 font-medium hidden lg:table-cell">
+                Team
               </th>
             </tr>
           </thead>
@@ -171,6 +231,23 @@ export default async function ProjectsPage() {
                 <td className="px-4 py-3 hidden lg:table-cell">
                   <BudgetBar logged={p.totalLogged} estimated={p.totalEstimated} />
                 </td>
+                <td className="px-4 py-3 hidden 2xl:table-cell">
+                  {p.nextMilestone ? (
+                    <div>
+                      <p className="text-gray-300 text-xs truncate max-w-[140px]">{p.nextMilestone.title}</p>
+                      {p.nextMilestone.dueDate && (
+                        <p className="text-gray-600 text-xs mt-0.5">
+                          {p.nextMilestone.dueDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <span className="text-gray-700 text-xs">—</span>
+                  )}
+                </td>
+                <td className="px-4 py-3 hidden lg:table-cell">
+                  <TeamChips members={p.teamMembers} />
+                </td>
                 <td className="px-4 py-3 hidden xl:table-cell">
                   {p.latestUpdate ? (
                     <Link href={`/projects/${p.id}`} className="block group">
@@ -195,7 +272,7 @@ export default async function ProjectsPage() {
             ))}
             {enriched.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-gray-600">
+                <td colSpan={7} className="px-4 py-8 text-center text-gray-600">
                   No active projects found. Run a sync to populate data.
                 </td>
               </tr>

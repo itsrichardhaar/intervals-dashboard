@@ -36,11 +36,21 @@ export async function POST(req: NextRequest) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json();
-  const { name, email } = body as { name: string; email: string };
+  const rawName = typeof body?.name === "string" ? body.name.trim() : "";
+  const rawEmail = typeof body?.email === "string" ? body.email.trim().toLowerCase() : "";
 
-  if (!name || !email) {
+  if (!rawName || !rawEmail) {
     return NextResponse.json({ error: "Name and email are required." }, { status: 400 });
   }
+
+  // Basic server-side email format check (reject obvious non-emails that bypass browser validation).
+  const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRe.test(rawEmail)) {
+    return NextResponse.json({ error: "Invalid email address." }, { status: 400 });
+  }
+
+  const name = rawName;
+  const email = rawEmail;
 
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
