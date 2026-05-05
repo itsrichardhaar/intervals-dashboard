@@ -16,7 +16,8 @@ interface IntervalsTimeResponse {
 }
 
 async function fetchAllTimeEntries(): Promise<IntervalsTimeEntry[]> {
-  const LIMIT = 1000;
+  // Use larger pages to reduce API round-trips (fewer calls = faster)
+  const LIMIT = 2000;
   // Cap at 30,000 entries per run to stay within the 60s function timeout
   const MAX_ENTRIES = 30000;
 
@@ -67,22 +68,25 @@ export async function syncTimeEntries(): Promise<{ synced: number; errors: strin
     skipDuplicates: true,
   });
 
-  // Recompute loggedHours for all tasks from the full DB
+  // Recompute loggedHours from the full DB using a single bulk SQL update
   const grouped = await prisma.intervalsTimeEntry.groupBy({
     by: ["taskId"],
     where: { taskId: { not: null } },
     _sum: { hours: true },
   });
 
-  const BATCH = 10;
-  for (let i = 0; i < grouped.length; i += BATCH) {
-    await Promise.all(
-      grouped.slice(i, i + BATCH).map(({ taskId, _sum }) =>
-        taskId
-          ? prisma.intervalsTask.update({ where: { id: taskId }, data: { loggedHours: _sum.hours ?? 0 } })
-          : Promise.resolve()
-      )
-    );
+  if (grouped.length > 0) {
+    const taskIds = grouped.map((g) => g.taskId!);
+    const hours = grouped.map((g) => g._sum.hours ?? 0);
+
+    await prisma.$executeRaw`
+      UPDATE "IntervalsTask" AS t
+      SET "loggedHours" = v.hours
+      FROM (
+        SELECT unnest(${taskIds}::text[]) AS id, unnest(${hours}::float8[]) AS hours
+      ) v
+      WHERE t.id = v.id
+    `;
   }
 
   return { synced: result.count, errors: [] };
