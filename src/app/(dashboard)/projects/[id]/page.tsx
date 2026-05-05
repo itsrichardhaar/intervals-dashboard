@@ -7,6 +7,7 @@ import {
   calculateBandwidth,
   normalizeTaskStatus,
   isOverdue,
+  bandwidthTextColor,
   type TaskInput,
   type TaskStatus,
 } from "@/lib/calculators/bandwidth";
@@ -319,7 +320,7 @@ export default async function ProjectDetailPage({
                     if (bw === null) return (
                       <span className="text-xs text-gray-600">Not linked</span>
                     );
-                    const color = bw >= 90 ? "text-red-400" : bw >= 70 ? "text-yellow-400" : "text-green-400";
+                    const color = bandwidthTextColor(bw);
                     return (
                       <span className={`text-xs font-medium tabular-nums ${color}`}>
                         {bw}% bandwidth

@@ -1,5 +1,13 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { calculateBandwidth, normalizeTaskStatus, isOverdue, TaskInput } from "./bandwidth";
+import {
+  calculateBandwidth,
+  normalizeTaskStatus,
+  isOverdue,
+  bandwidthBarColor,
+  bandwidthTextColor,
+  bandwidthHexColor,
+  type TaskInput,
+} from "./bandwidth";
 
 const MONDAY = new Date("2025-05-05T10:00:00.000Z"); // A Monday
 
@@ -205,4 +213,31 @@ describe("calculateBandwidth", () => {
     expect(calculateBandwidth(tasks, "monthly").remainingHours).toBe(0);
     expect(calculateBandwidth(tasks, "total").remainingHours).toBe(8);
   });
+});
+
+// ── bandwidthBarColor ─────────────────────────────────────────────────────────
+
+describe("bandwidthBarColor", () => {
+  it("returns red bar at 90%", () => expect(bandwidthBarColor(90)).toBe("bg-red-500"));
+  it("returns red bar above 90%", () => expect(bandwidthBarColor(100)).toBe("bg-red-500"));
+  it("returns yellow bar at 70%", () => expect(bandwidthBarColor(70)).toBe("bg-yellow-400"));
+  it("returns yellow bar between 70 and 89%", () => expect(bandwidthBarColor(75)).toBe("bg-yellow-400"));
+  it("returns green bar below 70%", () => expect(bandwidthBarColor(69)).toBe("bg-green-500"));
+  it("returns green bar at 0%", () => expect(bandwidthBarColor(0)).toBe("bg-green-500"));
+});
+
+// ── bandwidthTextColor ────────────────────────────────────────────────────────
+
+describe("bandwidthTextColor", () => {
+  it("returns red text at 90%", () => expect(bandwidthTextColor(90)).toBe("text-red-400"));
+  it("returns yellow text at 70%", () => expect(bandwidthTextColor(70)).toBe("text-yellow-400"));
+  it("returns green text below 70%", () => expect(bandwidthTextColor(50)).toBe("text-green-400"));
+});
+
+// ── bandwidthHexColor ─────────────────────────────────────────────────────────
+
+describe("bandwidthHexColor", () => {
+  it("returns red hex at 90%", () => expect(bandwidthHexColor(90)).toBe("#ef4444"));
+  it("returns yellow hex at 70%", () => expect(bandwidthHexColor(70)).toBe("#eab308"));
+  it("returns green hex below 70%", () => expect(bandwidthHexColor(50)).toBe("#22c55e"));
 });

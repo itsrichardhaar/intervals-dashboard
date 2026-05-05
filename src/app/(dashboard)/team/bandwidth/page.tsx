@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import {
   calculateBandwidth,
   normalizeTaskStatus,
+  bandwidthBarColor,
+  bandwidthTextColor,
   type TaskInput,
 } from "@/lib/calculators/bandwidth";
 import { parseTimeWindow } from "@/lib/dates";
@@ -23,14 +25,8 @@ function BandwidthRow({
   available: number;
   remaining: number;
 }) {
-  const color =
-    percent >= 90 ? "bg-red-500" : percent >= 70 ? "bg-yellow-400" : "bg-green-500";
-  const textColor =
-    percent >= 90
-      ? "text-red-400"
-      : percent >= 70
-        ? "text-yellow-400"
-        : "text-green-400";
+  const color = bandwidthBarColor(percent);
+  const textColor = bandwidthTextColor(percent);
 
   return (
     <tr className="bg-gray-950 hover:bg-gray-900 transition-colors">

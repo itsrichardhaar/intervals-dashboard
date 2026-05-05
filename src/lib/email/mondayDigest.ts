@@ -1,5 +1,6 @@
 import { escapeHtml } from "./escape";
 import type { EmailContent } from "./resend";
+import { bandwidthHexColor } from "@/lib/calculators/bandwidth";
 export type { EmailContent };
 
 export interface DigestTask {
@@ -25,8 +26,7 @@ export function buildDigestEmail(input: DigestInput): EmailContent {
   const { name, bandwidthPercent, tasks, openActionItemCount, flaggedTaskCount } = input;
 
   const safeName = escapeHtml(name);
-  const bandwidthColor =
-    bandwidthPercent >= 90 ? "#ef4444" : bandwidthPercent >= 70 ? "#eab308" : "#22c55e";
+  const bandwidthColor = bandwidthHexColor(bandwidthPercent);
 
   const taskRows = tasks
     .map(

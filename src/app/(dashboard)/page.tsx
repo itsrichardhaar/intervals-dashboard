@@ -8,6 +8,8 @@ import {
   normalizeTaskStatus,
   isOverdue,
   QUALIFYING_STATUSES,
+  bandwidthBarColor,
+  bandwidthTextColor,
   type TaskInput,
   type TaskStatus,
 } from "@/lib/calculators/bandwidth";
@@ -52,19 +54,8 @@ function StatusBadge({ status }: { status: TaskStatus }) {
 }
 
 function BandwidthBar({ percent }: { percent: number }) {
-  const color =
-    percent >= 90
-      ? "bg-red-500"
-      : percent >= 70
-        ? "bg-yellow-400"
-        : "bg-green-500";
-
-  const textColor =
-    percent >= 90
-      ? "text-red-400"
-      : percent >= 70
-        ? "text-yellow-400"
-        : "text-green-400";
+  const color = bandwidthBarColor(percent);
+  const textColor = bandwidthTextColor(percent);
 
   return (
     <div className="space-y-2">

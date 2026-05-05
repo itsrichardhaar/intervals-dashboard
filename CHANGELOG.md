@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.8] - 2026-05-05
+
+### Changed
+- Extracted `bandwidthBarColor`, `bandwidthTextColor`, `bandwidthHexColor` into `bandwidth.ts`, consolidating 4 independent copies of the 90%/70% threshold logic
+- Home, team bandwidth, project detail, and Monday digest email all delegate to the shared color helpers
+- Added 12 new tests for the three color helpers (143 total)
+
+---
+
 ## [0.1.7] - 2026-05-05
 
 ### Changed

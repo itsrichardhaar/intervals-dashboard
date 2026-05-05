@@ -58,6 +58,36 @@ export function isOverdue(date: Date | null): boolean {
 
 const WORK_WEEK_HOURS = 40;
 
+/**
+ * Tailwind CSS classes for a bandwidth progress bar fill.
+ * Thresholds: ≥90 → red, ≥70 → yellow, else green.
+ */
+export function bandwidthBarColor(pct: number): string {
+  if (pct >= 90) return "bg-red-500";
+  if (pct >= 70) return "bg-yellow-400";
+  return "bg-green-500";
+}
+
+/**
+ * Tailwind CSS text color class for a bandwidth percentage label.
+ * Thresholds: ≥90 → red, ≥70 → yellow, else green.
+ */
+export function bandwidthTextColor(pct: number): string {
+  if (pct >= 90) return "text-red-400";
+  if (pct >= 70) return "text-yellow-400";
+  return "text-green-400";
+}
+
+/**
+ * Hex color for use in HTML email templates.
+ * Thresholds: ≥90 → red, ≥70 → yellow, else green.
+ */
+export function bandwidthHexColor(pct: number): string {
+  if (pct >= 90) return "#ef4444";
+  if (pct >= 70) return "#eab308";
+  return "#22c55e";
+}
+
 function isInTimeWindow(dueDate: Date | null, window: TimeWindow): boolean {
   if (window === "total") return true;
   if (!dueDate) return false;
