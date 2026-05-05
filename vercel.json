@@ -3,6 +3,8 @@
     { "path": "/api/sync/people",       "schedule": "*/15 * * * *" },
     { "path": "/api/sync/projects",     "schedule": "2-59/15 * * * *" },
     { "path": "/api/sync/tasks",        "schedule": "5-59/15 * * * *" },
-    { "path": "/api/sync/time-entries", "schedule": "8-59/15 * * * *" }
+    { "path": "/api/sync/time-entries", "schedule": "8-59/15 * * * *" },
+    { "path": "/api/sync/milestones",   "schedule": "11-59/15 * * * *" },
+    { "path": "/api/sync/documents",    "schedule": "13-59/15 * * * *" }
   ]
 }

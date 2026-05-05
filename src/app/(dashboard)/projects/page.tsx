@@ -59,6 +59,7 @@ export default async function ProjectsPage() {
   if (!session?.user?.id) redirect("/login");
 
   const projects = await prisma.intervalsProject.findMany({
+    where: { status: "active" },
     orderBy: [{ clientName: "asc" }, { name: "asc" }],
     include: {
       tasks: {

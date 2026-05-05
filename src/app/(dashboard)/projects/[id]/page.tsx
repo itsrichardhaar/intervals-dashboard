@@ -86,35 +86,46 @@ export default async function ProjectDetailPage({
 
   const { id } = await params;
 
-  const [project, actionItems, statusUpdates, users] = await Promise.all([
-    prisma.intervalsProject.findUnique({
-      where: { id },
-      include: {
-        tasks: {
-          orderBy: { dueDate: "asc" },
-          include: { assignee: { select: { id: true, name: true } } },
+  const [project, actionItems, statusUpdates, users, milestones, documents] =
+    await Promise.all([
+      prisma.intervalsProject.findUnique({
+        where: { id },
+        include: {
+          tasks: {
+            orderBy: { dueDate: "asc" },
+            include: { assignee: { select: { id: true, name: true } } },
+          },
+          projectStatusOverride: true,
         },
-        projectStatusOverride: true,
-      },
-    }),
-    prisma.actionItem.findMany({
-      where: { projectId: id, completedAt: null },
-      orderBy: { createdAt: "asc" },
-      include: { assignee: { select: { id: true, name: true, email: true } } },
-    }),
-    prisma.weeklyStatusUpdate.findMany({
-      where: { projectId: id },
-      orderBy: { createdAt: "desc" },
-      take: 6,
-      include: { author: { select: { name: true, email: true } } },
-    }),
-    prisma.user.findMany({
-      select: { id: true, name: true, email: true },
-      orderBy: { name: "asc" },
-    }),
-  ]);
+      }),
+      prisma.actionItem.findMany({
+        where: { projectId: id, completedAt: null },
+        orderBy: { createdAt: "asc" },
+        include: { assignee: { select: { id: true, name: true, email: true } } },
+      }),
+      prisma.weeklyStatusUpdate.findMany({
+        where: { projectId: id },
+        orderBy: { createdAt: "desc" },
+        take: 6,
+        include: { author: { select: { name: true, email: true } } },
+      }),
+      prisma.user.findMany({
+        select: { id: true, name: true, email: true },
+        orderBy: { name: "asc" },
+      }),
+      prisma.intervalsMilestone.findMany({
+        where: { projectId: id },
+        orderBy: [{ completed: "asc" }, { dueDate: "asc" }],
+      }),
+      prisma.intervalsDocument.findMany({
+        where: { projectId: id },
+        orderBy: { title: "asc" },
+      }),
+    ]);
 
   if (!project) notFound();
+
+  const isArchived = project.status === "inactive";
 
   // ── Compute status ────────────────────────────────────────────────────────
   const totalEstimated = project.tasks.reduce(
@@ -175,11 +186,19 @@ export default async function ProjectDetailPage({
     <div className="max-w-5xl mx-auto px-6 py-8 space-y-8">
       {/* Breadcrumb */}
       <Link
-        href="/projects"
+        href={isArchived ? "/projects/archive" : "/projects"}
         className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
       >
-        ← Projects
+        ← {isArchived ? "Archive" : "Projects"}
       </Link>
+
+      {/* Archived notice */}
+      {isArchived && (
+        <div className="flex items-center gap-2 bg-gray-800 border border-gray-700 rounded-lg px-4 py-3">
+          <span className="text-gray-400 text-xs font-medium uppercase tracking-wide">Archived</span>
+          <span className="text-gray-600 text-xs">This project is no longer active. History is read-only.</span>
+        </div>
+      )}
 
       {/* Project header */}
       <div className="flex items-start justify-between gap-4">
@@ -318,7 +337,7 @@ export default async function ProjectDetailPage({
           <h2 className="text-sm font-medium text-gray-400 uppercase tracking-wide">
             Action Items
           </h2>
-          <AddActionItemForm projectId={project.id} users={users} />
+          {!isArchived && <AddActionItemForm projectId={project.id} users={users} />}
         </div>
 
         {actionItems.length === 0 ? (
@@ -370,7 +389,7 @@ export default async function ProjectDetailPage({
           <h2 className="text-sm font-medium text-gray-400 uppercase tracking-wide">
             Status Updates
           </h2>
-          <AddWeeklyStatusUpdateForm projectId={project.id} />
+          {!isArchived && <AddWeeklyStatusUpdateForm projectId={project.id} />}
         </div>
 
         {statusUpdates.length === 0 ? (
@@ -398,6 +417,87 @@ export default async function ProjectDetailPage({
                 <p className="text-sm text-gray-300 leading-relaxed">
                   {update.summary}
                 </p>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Milestones */}
+      <section>
+        <h2 className="text-sm font-medium text-gray-400 uppercase tracking-wide mb-3">
+          Milestones
+        </h2>
+        {milestones.length === 0 ? (
+          <p className="text-gray-600 text-sm">No milestones for this project.</p>
+        ) : (
+          <div className="rounded-lg border border-gray-800 overflow-hidden divide-y divide-gray-800">
+            {milestones.map((m) => {
+              const overdueMilestone =
+                !m.completed && m.dueDate !== null && m.dueDate < new Date();
+              return (
+                <div
+                  key={m.id}
+                  className={`flex items-center gap-4 px-4 py-3 ${
+                    m.completed ? "bg-gray-900/40" : "bg-gray-950"
+                  }`}
+                >
+                  <span
+                    className={`text-sm ${
+                      m.completed ? "text-gray-500 line-through" : overdueMilestone ? "text-red-300" : "text-white"
+                    }`}
+                  >
+                    {m.title}
+                  </span>
+                  {m.dueDate && (
+                    <span
+                      className={`ml-auto text-xs whitespace-nowrap ${
+                        m.completed
+                          ? "text-gray-600"
+                          : overdueMilestone
+                            ? "text-red-400"
+                            : "text-gray-500"
+                      }`}
+                    >
+                      {overdueMilestone && "⚠ "}
+                      {formatDate(m.dueDate)}
+                    </span>
+                  )}
+                  {m.completed && (
+                    <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-green-900/40 text-green-600">
+                      Done
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      {/* Documents */}
+      <section>
+        <h2 className="text-sm font-medium text-gray-400 uppercase tracking-wide mb-3">
+          Documents
+        </h2>
+        {documents.length === 0 ? (
+          <p className="text-gray-600 text-sm">No documents for this project.</p>
+        ) : (
+          <div className="rounded-lg border border-gray-800 overflow-hidden divide-y divide-gray-800">
+            {documents.map((doc) => (
+              <div key={doc.id} className="flex items-center px-4 py-3 bg-gray-950">
+                {doc.url ? (
+                  <a
+                    href={doc.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
+                  >
+                    {doc.title}
+                  </a>
+                ) : (
+                  <span className="text-sm text-gray-300">{doc.title}</span>
+                )}
               </div>
             ))}
           </div>

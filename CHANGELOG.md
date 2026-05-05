@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.4] - 2026-05-05
+
+### Added
+- `syncMilestones` and `syncDocuments` sync functions with independent Vercel Cron jobs (`/api/sync/milestones` at :11, `/api/sync/documents` at :13 each 15-min cycle)
+- Master `/api/sync` route now includes milestones and documents
+- Individual project page: Milestones panel (sorted upcoming-first, completed greyed/struck-through, overdue warned) and Documents panel (linked titles)
+- Archived project pages: "Archived" banner, read-only (Add forms hidden), breadcrumb links to archive list
+- `/projects/archive` page: searchable by name/client, sortable by name or close date, shows historical update/action-item counts per project
+- Active projects overview now filters to `status: "active"` only; inactive projects appear only in the archive
+
+Closes #26, #27, #28
+
+---
+
 ## [0.1.3] - 2026-05-05
 
 ### Added

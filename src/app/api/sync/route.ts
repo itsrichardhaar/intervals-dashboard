@@ -4,6 +4,8 @@ import { syncPeople } from "@/lib/intervals/syncPeople";
 import { syncProjects } from "@/lib/intervals/syncProjects";
 import { syncTasks } from "@/lib/intervals/syncTasks";
 import { syncTimeEntries } from "@/lib/intervals/syncTimeEntries";
+import { syncMilestones } from "@/lib/intervals/syncMilestones";
+import { syncDocuments } from "@/lib/intervals/syncDocuments";
 
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get("authorization");
@@ -19,10 +21,12 @@ export async function GET(req: NextRequest) {
   const allErrors: string[] = [];
 
   const runners: Array<{ name: string; fn: () => Promise<{ synced: number; errors: string[] }> }> = [
-    { name: "people", fn: syncPeople },
-    { name: "projects", fn: syncProjects },
-    { name: "tasks", fn: syncTasks },
+    { name: "people",      fn: syncPeople },
+    { name: "projects",    fn: syncProjects },
+    { name: "tasks",       fn: syncTasks },
     { name: "time_entries", fn: syncTimeEntries },
+    { name: "milestones",  fn: syncMilestones },
+    { name: "documents",   fn: syncDocuments },
   ];
 
   for (const { name, fn } of runners) {
