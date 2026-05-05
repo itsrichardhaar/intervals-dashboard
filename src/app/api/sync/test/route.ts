@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyCronAuth } from "@/lib/intervals/syncAuth";
+import { verifyCronAuth } from "@/lib/cron/auth";
 
 export const maxDuration = 15;
 

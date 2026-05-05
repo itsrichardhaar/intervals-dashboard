@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { verifyCronAuth } from "@/lib/cron/auth";
 import { syncPeople } from "@/lib/intervals/syncPeople";
 import { syncProjects } from "@/lib/intervals/syncProjects";
 import { syncTasks } from "@/lib/intervals/syncTasks";
@@ -8,8 +9,7 @@ import { syncMilestones } from "@/lib/intervals/syncMilestones";
 import { syncDocuments } from "@/lib/intervals/syncDocuments";
 
 export async function GET(req: NextRequest) {
-  const authHeader = req.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!verifyCronAuth(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

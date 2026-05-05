@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { verifyCronAuth } from "@/lib/intervals/syncAuth";
+import { verifyCronAuth } from "@/lib/cron/auth";
 import { sendMondayDigest } from "@/lib/email/sender";
 
 export async function GET(req: NextRequest) {

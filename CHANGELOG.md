@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.9] - 2026-05-05
+
+### Changed
+- Moved cron bearer-token verification to `src/lib/cron/auth.ts` — it now owns all cron routes, not just the email routes
+- Main `/api/sync` route now uses `verifyCronAuth` (previously had an unsafe `!==` string comparison vulnerable to timing attacks)
+- Deleted `src/lib/intervals/syncAuth.ts`; all 10 route handlers updated to import from `@/lib/cron/auth`
+
+### Security
+- Fixed timing-attack vulnerability in `/api/sync` route where cron secret was compared with `!==`
+
+---
+
 ## [0.1.8] - 2026-05-05
 
 ### Changed
