@@ -53,9 +53,17 @@ function StatusBadge({ status }: { status: TaskStatus }) {
   );
 }
 
-function BandwidthBar({ percent }: { percent: number }) {
+function BandwidthBar({
+  percent,
+  window,
+}: {
+  percent: number;
+  window: "weekly" | "monthly" | "quarterly";
+}) {
   const color = bandwidthBarColor(percent);
   const textColor = bandwidthTextColor(percent);
+  const windowLabel =
+    window === "weekly" ? "week" : window === "monthly" ? "month" : "quarter";
 
   return (
     <div className="space-y-2">
@@ -63,7 +71,7 @@ function BandwidthBar({ percent }: { percent: number }) {
         <p className={`text-4xl font-bold tabular-nums ${textColor}`}>
           {percent}%
           <span className="text-sm font-normal text-gray-400 ml-2">
-            of your week is committed
+            of your {windowLabel} is committed
           </span>
         </p>
       </div>
@@ -150,7 +158,31 @@ export default async function HomePage({
       activeProjectMap.set(t.project.id, { id: t.project.id, name: t.project.name, clientName: t.project.clientName, openTaskCount: 1 });
     }
   }
-  const activeProjects = Array.from(activeProjectMap.values()).sort((a, b) => a.name.localeCompare(b.name));
+  const activeProjectIds = Array.from(activeProjectMap.keys());
+
+  // ── 6b. Fetch project health status overrides ───────────────────────────────
+  const statusOverrides = activeProjectIds.length > 0
+    ? await prisma.projectStatusOverride.findMany({
+        where: { projectId: { in: activeProjectIds } },
+        select: { projectId: true, status: true },
+      })
+    : [];
+  const overrideByProjectId = new Map(statusOverrides.map((o) => [o.projectId, o.status as "on_track" | "at_risk" | "blocked"]));
+
+  // Auto-detect at_risk from overdue tasks (for projects with no manual override)
+  const overdueProjectIds = new Set<string>();
+  for (const t of rawTasks) {
+    if (isOverdue(t.dueDate) && QUALIFYING_STATUSES.includes(normalizeTaskStatus(t.status))) {
+      overdueProjectIds.add(t.project.id);
+    }
+  }
+
+  const activeProjects = Array.from(activeProjectMap.values())
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map((p) => ({
+      ...p,
+      healthStatus: overrideByProjectId.get(p.id) ?? (overdueProjectIds.has(p.id) ? "at_risk" : "on_track") as "on_track" | "at_risk" | "blocked",
+    }));
 
   // ── 7. Fetch action items ───────────────────────────────────────────────────
   const actionItems = await prisma.actionItem.findMany({
@@ -196,19 +228,17 @@ export default async function HomePage({
               <TimeWindowToggle current={timeWindow} />
             </Suspense>
           </div>
-          <BandwidthBar percent={bandwidth.bandwidthPercent} />
+          <BandwidthBar percent={bandwidth.bandwidthPercent} window={timeWindow} />
           <p className="text-gray-400 text-sm">
             You have{" "}
             <span className="text-white font-medium">
               {bandwidth.availableBandwidthPercent}% available
             </span>{" "}
-            this week
-            {bandwidth.remainingHours > 0 && (
-              <>
-                {" "}
-                ({bandwidth.remainingHours.toFixed(1)}h remaining of 40h)
-              </>
-            )}
+            {timeWindow === "weekly" ? "this week" : timeWindow === "monthly" ? "this month" : "this quarter"}
+            {" "}
+            <span className="text-gray-600">
+              ({bandwidth.freeHours.toFixed(1)}h free of {bandwidth.capacityHours}h)
+            </span>
           </p>
         </section>
       )}
@@ -357,25 +387,43 @@ export default async function HomePage({
                 <tr>
                   <th className="text-left px-4 py-3 text-gray-400 font-medium">Project</th>
                   <th className="text-left px-4 py-3 text-gray-400 font-medium hidden sm:table-cell">Client</th>
+                  <th className="text-left px-4 py-3 text-gray-400 font-medium">Status</th>
                   <th className="text-right px-4 py-3 text-gray-400 font-medium">Open Tasks</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-800">
-                {activeProjects.map((p) => (
-                  <tr key={p.id} className="bg-gray-950 hover:bg-gray-900 transition-colors">
-                    <td className="px-4 py-3">
-                      <Link href={`/projects/${p.id}`} className="text-white font-medium hover:text-blue-300 transition-colors">
-                        {p.name}
-                      </Link>
-                    </td>
-                    <td className="px-4 py-3 text-gray-400 hidden sm:table-cell">
-                      {p.clientName ?? <span className="text-gray-700">—</span>}
-                    </td>
-                    <td className="px-4 py-3 text-right text-gray-400 tabular-nums">
-                      {p.openTaskCount}
-                    </td>
-                  </tr>
-                ))}
+                {activeProjects.map((p) => {
+                  const healthStyles = {
+                    on_track: "bg-green-900/50 text-green-300 border border-green-700/50",
+                    at_risk:  "bg-yellow-900/50 text-yellow-300 border border-yellow-700/50",
+                    blocked:  "bg-red-900/50 text-red-300 border border-red-700/50",
+                  };
+                  const healthLabels = {
+                    on_track: "On Track",
+                    at_risk:  "At Risk",
+                    blocked:  "Blocked",
+                  };
+                  return (
+                    <tr key={p.id} className="bg-gray-950 hover:bg-gray-900 transition-colors">
+                      <td className="px-4 py-3">
+                        <Link href={`/projects/${p.id}`} className="text-white font-medium hover:text-blue-300 transition-colors">
+                          {p.name}
+                        </Link>
+                      </td>
+                      <td className="px-4 py-3 text-gray-400 hidden sm:table-cell">
+                        {p.clientName ?? <span className="text-gray-700">—</span>}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${healthStyles[p.healthStatus]}`}>
+                          {healthLabels[p.healthStatus]}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right text-gray-400 tabular-nums">
+                        {p.openTaskCount}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

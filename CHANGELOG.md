@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.11] - 2026-05-05
+
+### Changed
+- Renamed "All Time" time window to "This Quarter" — now filters to the current calendar quarter (Q1–Q4)
+- Bandwidth capacity denominators corrected: weekly = 40h, monthly = 160h, quarterly = 480h
+- Bandwidth subtitle now shows free hours matching the available %, e.g. "21% available (31.5h free of 40h)"
+- `BandwidthBar` label now says "week / month / quarter" depending on the active window
+- `CAPACITY_HOURS` map exported from `bandwidth.ts`; `freeHours` and `capacityHours` added to `BandwidthResult`
+- My Active Projects now shows a project health status badge (On Track / At Risk / Blocked); auto-detects At Risk from overdue tasks, respects manual overrides
+- `parseTimeWindow` updated — "total" now falls back to "weekly"; "quarterly" is valid
+- Added `startOfCurrentQuarter` and `endOfCurrentQuarter` to `dates.ts`
+- 10 new tests (153 total)
+
+---
+
 ## [0.1.10] - 2026-05-05
 
 ### Fixed

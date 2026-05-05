@@ -4,9 +4,9 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import type { TimeWindow } from "@/lib/calculators/bandwidth";
 
 const OPTIONS: { value: TimeWindow; label: string }[] = [
-  { value: "weekly",  label: "This Week" },
-  { value: "monthly", label: "This Month" },
-  { value: "total",   label: "All Time" },
+  { value: "weekly",    label: "This Week" },
+  { value: "monthly",   label: "This Month" },
+  { value: "quarterly", label: "This Quarter" },
 ];
 
 interface Props {

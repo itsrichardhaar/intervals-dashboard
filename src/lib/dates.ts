@@ -25,6 +25,22 @@ export function isThisWeek(date: Date | null): boolean {
   return date >= startOfCurrentWeek() && date <= endOfCurrentWeek();
 }
 
+/** First day of the current calendar quarter at local midnight. */
+export function startOfCurrentQuarter(): Date {
+  const now = new Date();
+  const quarterStartMonth = Math.floor(now.getMonth() / 3) * 3;
+  return new Date(now.getFullYear(), quarterStartMonth, 1);
+}
+
+/** Last moment of the current calendar quarter (23:59:59.999 local). */
+export function endOfCurrentQuarter(): Date {
+  const now = new Date();
+  const quarterStartMonth = Math.floor(now.getMonth() / 3) * 3;
+  const d = new Date(now.getFullYear(), quarterStartMonth + 3, 0); // day 0 of next month = last day of quarter
+  d.setHours(23, 59, 59, 999);
+  return d;
+}
+
 /** Midnight today (local). Used for email dedup windows. */
 export function todayStart(): Date {
   const d = new Date();
@@ -34,6 +50,6 @@ export function todayStart(): Date {
 
 /** Safe parse of the `window` query param; defaults to "weekly". */
 export function parseTimeWindow(raw: string | undefined): TimeWindow {
-  if (raw === "weekly" || raw === "monthly" || raw === "total") return raw;
+  if (raw === "weekly" || raw === "monthly" || raw === "quarterly") return raw;
   return "weekly";
 }

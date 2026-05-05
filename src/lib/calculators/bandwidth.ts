@@ -5,7 +5,7 @@ export type TaskStatus =
   | "in_client_review"
   | "closed";
 
-export type TimeWindow = "weekly" | "monthly" | "total";
+export type TimeWindow = "weekly" | "monthly" | "quarterly";
 
 export interface TaskInput {
   id: string;
@@ -21,10 +21,12 @@ export interface BandwidthResult {
   bandwidthPercent: number;
   availableBandwidthPercent: number;
   remainingHours: number;
+  capacityHours: number;
+  freeHours: number;
   flaggedTasks: TaskInput[];
 }
 
-import { startOfCurrentWeek, endOfCurrentWeek } from "@/lib/dates";
+import { startOfCurrentWeek, endOfCurrentWeek, startOfCurrentQuarter, endOfCurrentQuarter } from "@/lib/dates";
 
 export const QUALIFYING_STATUSES: TaskStatus[] = [
   "open",
@@ -32,6 +34,13 @@ export const QUALIFYING_STATUSES: TaskStatus[] = [
   "in_internal_review",
   "in_client_review",
 ];
+
+/** Capacity hours per time window. */
+export const CAPACITY_HOURS: Record<TimeWindow, number> = {
+  weekly: 40,
+  monthly: 160,
+  quarterly: 480,
+};
 
 const STATUS_NORMALIZATION_MAP: Record<string, TaskStatus> = {
   open: "open",
@@ -55,8 +64,6 @@ export function isOverdue(date: Date | null): boolean {
   today.setHours(0, 0, 0, 0);
   return date < today;
 }
-
-const WORK_WEEK_HOURS = 40;
 
 /**
  * Tailwind CSS classes for a bandwidth progress bar fill.
@@ -89,7 +96,6 @@ export function bandwidthHexColor(pct: number): string {
 }
 
 function isInTimeWindow(dueDate: Date | null, window: TimeWindow): boolean {
-  if (window === "total") return true;
   if (!dueDate) return false;
 
   if (window === "weekly") {
@@ -102,6 +108,10 @@ function isInTimeWindow(dueDate: Date | null, window: TimeWindow): boolean {
       dueDate.getFullYear() === now.getFullYear() &&
       dueDate.getMonth() === now.getMonth()
     );
+  }
+
+  if (window === "quarterly") {
+    return dueDate >= startOfCurrentQuarter() && dueDate <= endOfCurrentQuarter();
   }
 
   return false;
@@ -127,16 +137,20 @@ export function calculateBandwidth(
     totalRemainingHours += remaining;
   }
 
+  const capacity = CAPACITY_HOURS[window];
   const bandwidthPercent = Math.min(
     100,
-    Math.round((totalRemainingHours / WORK_WEEK_HOURS) * 100)
+    Math.round((totalRemainingHours / capacity) * 100)
   );
   const availableBandwidthPercent = 100 - bandwidthPercent;
+  const freeHours = Math.max(0, capacity - totalRemainingHours);
 
   return {
     bandwidthPercent,
     availableBandwidthPercent,
     remainingHours: totalRemainingHours,
+    capacityHours: capacity,
+    freeHours,
     flaggedTasks,
   };
 }

@@ -3,6 +3,8 @@ import {
   startOfCurrentWeek,
   endOfCurrentWeek,
   isThisWeek,
+  startOfCurrentQuarter,
+  endOfCurrentQuarter,
   todayStart,
   parseTimeWindow,
 } from "./dates";
@@ -122,16 +124,72 @@ describe("parseTimeWindow", () => {
     expect(parseTimeWindow("monthly")).toBe("monthly");
   });
 
-  it("passes through 'total'", () => {
-    expect(parseTimeWindow("total")).toBe("total");
+  it("passes through 'quarterly'", () => {
+    expect(parseTimeWindow("quarterly")).toBe("quarterly");
   });
 
   it("defaults to 'weekly' for undefined", () => {
     expect(parseTimeWindow(undefined)).toBe("weekly");
   });
 
-  it("defaults to 'weekly' for unknown strings", () => {
+  it("defaults to 'weekly' for unknown strings including old 'total'", () => {
+    expect(parseTimeWindow("total")).toBe("weekly");
     expect(parseTimeWindow("yearly")).toBe("weekly");
     expect(parseTimeWindow("")).toBe("weekly");
+  });
+});
+
+// ── startOfCurrentQuarter ─────────────────────────────────────────────────────
+
+describe("startOfCurrentQuarter", () => {
+  it("returns Apr 1 when pinned to May 2026 (Q2)", () => {
+    pin(); // 2026-05-05 → Q2 (Apr–Jun)
+    const result = startOfCurrentQuarter();
+    expect(result.getMonth()).toBe(3); // April (0-indexed)
+    expect(result.getDate()).toBe(1);
+    expect(result.getHours()).toBe(0);
+  });
+
+  it("returns Jan 1 for Q1 dates", () => {
+    pin(new Date("2026-02-15T12:00:00"));
+    const result = startOfCurrentQuarter();
+    expect(result.getMonth()).toBe(0); // January
+    expect(result.getDate()).toBe(1);
+  });
+
+  it("returns Jul 1 for Q3 dates", () => {
+    pin(new Date("2026-08-01T12:00:00"));
+    const result = startOfCurrentQuarter();
+    expect(result.getMonth()).toBe(6); // July
+    expect(result.getDate()).toBe(1);
+  });
+
+  it("returns Oct 1 for Q4 dates", () => {
+    pin(new Date("2026-11-30T12:00:00"));
+    const result = startOfCurrentQuarter();
+    expect(result.getMonth()).toBe(9); // October
+    expect(result.getDate()).toBe(1);
+  });
+});
+
+// ── endOfCurrentQuarter ───────────────────────────────────────────────────────
+
+describe("endOfCurrentQuarter", () => {
+  it("returns Jun 30 at 23:59:59.999 when in Q2", () => {
+    pin(); // 2026-05-05 → Q2
+    const result = endOfCurrentQuarter();
+    expect(result.getMonth()).toBe(5); // June
+    expect(result.getDate()).toBe(30);
+    expect(result.getHours()).toBe(23);
+    expect(result.getMinutes()).toBe(59);
+    expect(result.getSeconds()).toBe(59);
+    expect(result.getMilliseconds()).toBe(999);
+  });
+
+  it("returns Dec 31 at end of day for Q4", () => {
+    pin(new Date("2026-10-01T08:00:00"));
+    const result = endOfCurrentQuarter();
+    expect(result.getMonth()).toBe(11); // December
+    expect(result.getDate()).toBe(31);
   });
 });

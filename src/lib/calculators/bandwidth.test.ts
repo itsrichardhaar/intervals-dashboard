@@ -6,6 +6,7 @@ import {
   bandwidthBarColor,
   bandwidthTextColor,
   bandwidthHexColor,
+  CAPACITY_HOURS,
   type TaskInput,
 } from "./bandwidth";
 
@@ -197,21 +198,52 @@ describe("calculateBandwidth", () => {
     expect(result.bandwidthPercent).toBe(0);
   });
 
-  it("total filter includes all open tasks regardless of due date", () => {
-    const farFuture = new Date("2030-01-01T10:00:00.000Z");
-    const tasks = [
-      makeTask({ dueDate: farFuture, estimatedHours: 8 }),
-      makeTask({ id: "t2", dueDate: null, estimatedHours: 8 }),
-    ];
-    const result = calculateBandwidth(tasks, "total");
-    expect(result.remainingHours).toBe(16);
+  it("quarterly filter includes tasks due in the current calendar quarter", () => {
+    // Pinned to 2025-05-05 (Q2: Apr–Jun 2025)
+    const inQ2 = new Date("2025-05-28T10:00:00.000Z");
+    const tasks = [makeTask({ dueDate: inQ2, estimatedHours: 8 })];
+    const result = calculateBandwidth(tasks, "quarterly");
+    expect(result.remainingHours).toBe(8);
   });
 
-  it("total filter excludes tasks with no due date from weekly and monthly but includes in total", () => {
+  it("quarterly filter excludes tasks due outside current quarter", () => {
+    const nextQ = new Date("2025-07-10T10:00:00.000Z"); // Q3
+    const tasks = [makeTask({ dueDate: nextQ, estimatedHours: 8 })];
+    const result = calculateBandwidth(tasks, "quarterly");
+    expect(result.remainingHours).toBe(0);
+  });
+
+  it("quarterly filter excludes tasks with no due date", () => {
     const tasks = [makeTask({ dueDate: null, estimatedHours: 8 })];
     expect(calculateBandwidth(tasks, "weekly").remainingHours).toBe(0);
     expect(calculateBandwidth(tasks, "monthly").remainingHours).toBe(0);
-    expect(calculateBandwidth(tasks, "total").remainingHours).toBe(8);
+    expect(calculateBandwidth(tasks, "quarterly").remainingHours).toBe(0);
+  });
+
+  it("uses 40h capacity for weekly, 160h for monthly, 480h for quarterly", () => {
+    // 8h remaining task
+    const task = makeTask({ estimatedHours: 8 });
+    expect(calculateBandwidth([task], "weekly").bandwidthPercent).toBe(20);   // 8/40
+    expect(calculateBandwidth([task], "monthly").bandwidthPercent).toBe(5);   // 8/160
+    expect(calculateBandwidth([task], "quarterly").bandwidthPercent).toBe(2); // 8/480 ≈ 1.67 → 2
+  });
+
+  it("returns correct freeHours and capacityHours", () => {
+    const task = makeTask({ estimatedHours: 10, loggedHours: 2 }); // 8h remaining
+    const result = calculateBandwidth([task], "weekly");
+    expect(result.capacityHours).toBe(40);
+    expect(result.freeHours).toBe(32); // 40 - 8
+    expect(result.remainingHours).toBe(8);
+  });
+});
+
+// ── CAPACITY_HOURS ────────────────────────────────────────────────────────────
+
+describe("CAPACITY_HOURS", () => {
+  it("weekly = 40, monthly = 160, quarterly = 480", () => {
+    expect(CAPACITY_HOURS.weekly).toBe(40);
+    expect(CAPACITY_HOURS.monthly).toBe(160);
+    expect(CAPACITY_HOURS.quarterly).toBe(480);
   });
 });
 
