@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.1] - 2026-05-05
+
+### Added
+- Project Overview page (`/projects`) — lists all active projects with name, client, status badge, and budget hours bar
+- `ProjectStatusControl` dropdown badge — set On Track / At Risk / Blocked per project; Blocked requires a reason; Reset to auto removes override
+- `PATCH /api/projects/[id]/status` — upserts or clears `ProjectStatusOverride`; validates status allowlist and requires reason for Blocked
+
+Closes #17, #18
+
+---
+
 ## [0.1.0] - 2026-05-05
 
 ### Added
