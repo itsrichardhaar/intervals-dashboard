@@ -3,6 +3,7 @@ import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { calculateProjectStatus } from "@/lib/calculators/projectStatus";
+import { isCarriedOver, isActionItemOverdue } from "@/lib/actionItems";
 import ProjectStatusControl from "@/components/ProjectStatusControl";
 import CompleteActionItemButton from "@/components/CompleteActionItemButton";
 import AddWeeklyStatusUpdateForm from "@/components/AddWeeklyStatusUpdateForm";
@@ -325,22 +326,32 @@ export default async function ProjectDetailPage({
         ) : (
           <div className="space-y-2">
             {actionItems.map((item) => {
-              const overdue = item.dueDate !== null && item.dueDate < new Date();
+              const overdue = isActionItemOverdue({ dueDate: item.dueDate, completedAt: null });
+              const carriedOver = isCarriedOver({ createdAt: item.createdAt, completedAt: null });
               return (
                 <div
                   key={item.id}
                   className="flex items-start gap-3 bg-gray-900 border border-gray-800 rounded-lg px-4 py-3"
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="text-white text-sm">{item.description}</p>
-                    <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
-                      <span>
-                        {item.assignee.name ?? item.assignee.email}
-                      </span>
+                    <div className="flex flex-wrap items-center gap-2 mb-1">
+                      <p className="text-white text-sm">{item.description}</p>
+                      {carriedOver && (
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-yellow-900/50 text-yellow-300">
+                          Carried over
+                        </span>
+                      )}
+                      {overdue && (
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-red-900/50 text-red-300">
+                          Overdue
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3 text-xs text-gray-500">
+                      <span>{item.assignee.name ?? item.assignee.email}</span>
                       {item.dueDate && (
                         <span className={overdue ? "text-red-400" : ""}>
                           Due {formatDate(item.dueDate)}
-                          {overdue && " · Overdue"}
                         </span>
                       )}
                     </div>

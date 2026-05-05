@@ -1,13 +1,16 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import {
   calculateBandwidth,
   type TaskInput,
   type TaskStatus,
+  type TimeWindow,
 } from "@/lib/calculators/bandwidth";
 import CompleteActionItemButton from "@/components/CompleteActionItemButton";
+import TimeWindowToggle from "@/components/TimeWindowToggle";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -128,9 +131,21 @@ function BandwidthBar({ percent }: { percent: number }) {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export default async function HomePage() {
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ window?: string }>;
+}) {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
+
+  const { window: windowParam } = await searchParams;
+  const timeWindow: TimeWindow =
+    (["weekly", "monthly", "total"] as TimeWindow[]).includes(
+      windowParam as TimeWindow
+    )
+      ? (windowParam as TimeWindow)
+      : "weekly";
 
   const userId = session.user.id;
   const firstName = session.user.name?.split(" ")[0] ?? "";
@@ -162,7 +177,7 @@ export default async function HomePage() {
   }));
 
   // ── 4. Calculate bandwidth ──────────────────────────────────────────────────
-  const bandwidth = calculateBandwidth(tasks, "weekly");
+  const bandwidth = calculateBandwidth(tasks, timeWindow);
 
   // ── 5. Tasks this week (sorted: overdue first, then by due date) ────────────
   const QUALIFYING_STATUSES: TaskStatus[] = [
@@ -225,6 +240,12 @@ export default async function HomePage() {
       {/* ── Bandwidth ── */}
       {mapping && (
         <section className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
+          <div className="flex items-center justify-between gap-4">
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Bandwidth</p>
+            <Suspense>
+              <TimeWindowToggle current={timeWindow} />
+            </Suspense>
+          </div>
           <BandwidthBar percent={bandwidth.bandwidthPercent} />
           <p className="text-gray-400 text-sm">
             You have{" "}

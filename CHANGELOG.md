@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.3] - 2026-05-05
+
+### Added
+- Team Bandwidth page (`/team/bandwidth`) — all linked team members with color-coded bandwidth bars (green <70%, yellow 70–90%, red ≥90%), remaining hours, and unlinked member notices
+- `TimeWindowToggle` client component — Weekly / This Month / All Time toggle updates URL param and re-renders the server page
+- Bandwidth toggle added to Personal Home and Team Bandwidth (closes #25)
+- Project Overview table now shows the latest Weekly Status Update summary, author, and relative timestamp per project; "No updates yet" prompt links to project page (closes #22)
+- Action items on the project detail page now show "Carried over" (yellow) and "Overdue" (red) badges derived at read time (closes #23)
+- `isCarriedOver` and `isActionItemOverdue` pure functions in `src/lib/actionItems.ts` with 7 new unit tests; 50 total, all passing
+
+Closes #21, #22, #23, #25
+
+---
+
 ## [0.1.2] - 2026-05-05
 
 ### Added

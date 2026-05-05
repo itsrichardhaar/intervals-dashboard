@@ -41,6 +41,19 @@ function BudgetBar({ logged, estimated }: { logged: number; estimated: number })
   );
 }
 
+function timeAgo(date: Date): string {
+  const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (seconds < 60) return "just now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  const weeks = Math.floor(days / 7);
+  return `${weeks}w ago`;
+}
+
 export default async function ProjectsPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
@@ -59,6 +72,11 @@ export default async function ProjectsPage() {
         },
       },
       projectStatusOverride: true,
+      weeklyStatusUpdates: {
+        orderBy: { createdAt: "desc" },
+        take: 1,
+        include: { author: { select: { name: true } } },
+      },
     },
   });
 
@@ -82,6 +100,8 @@ export default async function ProjectsPage() {
       if (t.assignee) memberMap.set(t.assignee.id, t.assignee.name);
     }
 
+    const latestUpdate = p.weeklyStatusUpdates[0] ?? null;
+
     return {
       ...p,
       totalEstimated,
@@ -90,6 +110,7 @@ export default async function ProjectsPage() {
       hasOverride: !!override,
       blockedReason: override?.reason ?? null,
       teamMembers: Array.from(memberMap.values()),
+      latestUpdate,
     };
   });
 
@@ -104,20 +125,20 @@ export default async function ProjectsPage() {
         <table className="w-full text-sm">
           <thead className="bg-gray-900">
             <tr>
-              <th className="text-left px-4 py-3 text-gray-400 font-medium w-[30%]">
+              <th className="text-left px-4 py-3 text-gray-400 font-medium w-[28%]">
                 Project
               </th>
-              <th className="text-left px-4 py-3 text-gray-400 font-medium hidden md:table-cell w-[20%]">
+              <th className="text-left px-4 py-3 text-gray-400 font-medium hidden md:table-cell w-[15%]">
                 Client
               </th>
               <th className="text-left px-4 py-3 text-gray-400 font-medium w-[12%]">
                 Status
               </th>
-              <th className="text-left px-4 py-3 text-gray-400 font-medium hidden lg:table-cell w-[22%]">
+              <th className="text-left px-4 py-3 text-gray-400 font-medium hidden lg:table-cell w-[18%]">
                 Budget
               </th>
               <th className="text-left px-4 py-3 text-gray-400 font-medium hidden xl:table-cell">
-                Team
+                Latest Update
               </th>
             </tr>
           </thead>
@@ -150,24 +171,23 @@ export default async function ProjectsPage() {
                   <BudgetBar logged={p.totalLogged} estimated={p.totalEstimated} />
                 </td>
                 <td className="px-4 py-3 hidden xl:table-cell">
-                  {p.teamMembers.length > 0 ? (
-                    <div className="flex flex-wrap gap-1">
-                      {p.teamMembers.slice(0, 4).map((name) => (
-                        <span
-                          key={name}
-                          className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-gray-800 text-gray-300"
-                        >
-                          {name.split(" ")[0]}
-                        </span>
-                      ))}
-                      {p.teamMembers.length > 4 && (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-gray-800 text-gray-500">
-                          +{p.teamMembers.length - 4}
-                        </span>
-                      )}
-                    </div>
+                  {p.latestUpdate ? (
+                    <Link href={`/projects/${p.id}`} className="block group">
+                      <p className="text-gray-300 text-xs line-clamp-2 group-hover:text-white transition-colors">
+                        {p.latestUpdate.summary}
+                      </p>
+                      <p className="text-gray-600 text-xs mt-0.5">
+                        {p.latestUpdate.author.name ?? "Unknown"} ·{" "}
+                        {timeAgo(p.latestUpdate.createdAt)}
+                      </p>
+                    </Link>
                   ) : (
-                    <span className="text-gray-700 text-xs">—</span>
+                    <Link
+                      href={`/projects/${p.id}`}
+                      className="text-xs text-gray-700 hover:text-gray-500 transition-colors"
+                    >
+                      No updates yet →
+                    </Link>
                   )}
                 </td>
               </tr>
