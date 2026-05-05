@@ -4,28 +4,11 @@ import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import {
   calculateBandwidth,
+  normalizeTaskStatus,
   type TaskInput,
-  type TaskStatus,
   type TimeWindow,
 } from "@/lib/calculators/bandwidth";
 import TimeWindowToggle from "@/components/TimeWindowToggle";
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-const STATUS_MAP: Record<string, TaskStatus> = {
-  open: "open",
-  "in progress": "in_progress",
-  in_progress: "in_progress",
-  "in internal review": "in_internal_review",
-  in_internal_review: "in_internal_review",
-  "in client review": "in_client_review",
-  in_client_review: "in_client_review",
-  closed: "closed",
-};
-
-function mapStatus(raw: string): TaskStatus {
-  return STATUS_MAP[raw.toLowerCase()] ?? "open";
-}
 
 function BandwidthRow({
   name,
@@ -132,7 +115,7 @@ export default async function TeamBandwidthPage({
       id: task.id,
       title: task.title,
       projectName: task.project.name,
-      status: mapStatus(task.status),
+      status: normalizeTaskStatus(task.status),
       estimatedHours: task.estimatedHours ?? null,
       loggedHours: task.loggedHours,
       dueDate: task.dueDate,

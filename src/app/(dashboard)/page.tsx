@@ -5,6 +5,9 @@ import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import {
   calculateBandwidth,
+  normalizeTaskStatus,
+  isOverdue,
+  QUALIFYING_STATUSES,
   type TaskInput,
   type TaskStatus,
   type TimeWindow,
@@ -14,34 +17,12 @@ import TimeWindowToggle from "@/components/TimeWindowToggle";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const STATUS_MAP: Record<string, TaskStatus> = {
-  open: "open",
-  "in progress": "in_progress",
-  in_progress: "in_progress",
-  "in internal review": "in_internal_review",
-  in_internal_review: "in_internal_review",
-  "in client review": "in_client_review",
-  in_client_review: "in_client_review",
-  closed: "closed",
-};
-
-function mapStatus(raw: string): TaskStatus {
-  return STATUS_MAP[raw.toLowerCase()] ?? "open";
-}
-
 function formatDate(date: Date | null): string {
   if (!date) return "—";
   return date.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
   });
-}
-
-function isOverdue(date: Date | null): boolean {
-  if (!date) return false;
-  const now = new Date();
-  now.setHours(0, 0, 0, 0);
-  return date < now;
 }
 
 function startOfCurrentWeek(): Date {
@@ -170,7 +151,7 @@ export default async function HomePage({
     id: t.id,
     title: t.title,
     projectName: t.project.name,
-    status: mapStatus(t.status),
+    status: normalizeTaskStatus(t.status),
     estimatedHours: t.estimatedHours ?? null,
     loggedHours: t.loggedHours,
     dueDate: t.dueDate,
@@ -180,13 +161,6 @@ export default async function HomePage({
   const bandwidth = calculateBandwidth(tasks, timeWindow);
 
   // ── 5. Tasks this week (sorted: overdue first, then by due date) ────────────
-  const QUALIFYING_STATUSES: TaskStatus[] = [
-    "open",
-    "in_progress",
-    "in_internal_review",
-    "in_client_review",
-  ];
-
   const tasksThisWeek = tasks
     .filter(
       (t) =>
@@ -204,10 +178,9 @@ export default async function HomePage({
     });
 
   // ── 6. Derive active projects from tasks ───────────────────────────────────
-  const OPEN_STATUSES = new Set(["open", "in progress", "in_progress", "in internal review", "in_internal_review", "in client review", "in_client_review"]);
   const activeProjectMap = new Map<string, { id: string; name: string; clientName: string | null; openTaskCount: number }>();
   for (const t of rawTasks) {
-    if (!OPEN_STATUSES.has(t.status.toLowerCase())) continue;
+    if (!QUALIFYING_STATUSES.includes(normalizeTaskStatus(t.status))) continue;
     const existing = activeProjectMap.get(t.project.id);
     if (existing) {
       existing.openTaskCount++;

@@ -3,7 +3,13 @@ import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { calculateProjectStatus } from "@/lib/calculators/projectStatus";
-import { calculateBandwidth, type TaskInput, type TaskStatus } from "@/lib/calculators/bandwidth";
+import {
+  calculateBandwidth,
+  normalizeTaskStatus,
+  isOverdue,
+  type TaskInput,
+  type TaskStatus,
+} from "@/lib/calculators/bandwidth";
 import { isCarriedOver, isActionItemOverdue } from "@/lib/actionItems";
 import ProjectStatusControl from "@/components/ProjectStatusControl";
 import CompleteActionItemButton from "@/components/CompleteActionItemButton";
@@ -26,11 +32,6 @@ function formatDateTime(date: Date): string {
     hour: "numeric",
     minute: "2-digit",
   });
-}
-
-function isOverdue(date: Date | null): boolean {
-  if (!date) return false;
-  return date < new Date();
 }
 
 const STATUS_BADGE: Record<string, string> = {
@@ -60,20 +61,6 @@ const UPDATE_STATUS_LABELS: Record<string, string> = {
   at_risk:  "At Risk",
   blocked:  "Blocked",
 };
-
-function normalizeStatus(raw: string): string {
-  const map: Record<string, string> = {
-    "open": "open",
-    "in progress": "in_progress",
-    "in_progress": "in_progress",
-    "in internal review": "in_internal_review",
-    "in_internal_review": "in_internal_review",
-    "in client review": "in_client_review",
-    "in_client_review": "in_client_review",
-    "closed": "closed",
-  };
-  return map[raw.toLowerCase()] ?? "open";
-}
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
@@ -169,7 +156,7 @@ export default async function ProjectDetailPage({
         id: t.id,
         title: "",
         projectName: t.project.name,
-        status: (normalizeStatus(t.status) as TaskStatus) ?? "open",
+        status: normalizeTaskStatus(t.status),
         estimatedHours: t.estimatedHours,
         loggedHours: t.loggedHours,
         dueDate: t.dueDate,
@@ -192,7 +179,7 @@ export default async function ProjectDetailPage({
     dueDate: project.dueDate,
     tasks: project.tasks.map((t) => ({
       dueDate: t.dueDate,
-      status: normalizeStatus(t.status),
+      status: normalizeTaskStatus(t.status),
     })),
   });
 
@@ -343,7 +330,7 @@ export default async function ProjectDetailPage({
                 <table className="w-full text-sm">
                   <tbody className="divide-y divide-gray-800">
                     {group.tasks.map((task) => {
-                      const norm = normalizeStatus(task.status);
+                      const norm = normalizeTaskStatus(task.status);
                       const flagged = !task.estimatedHours;
                       const overdue = isOverdue(task.dueDate);
                       return (

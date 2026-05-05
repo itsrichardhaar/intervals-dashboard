@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
-import { calculateBandwidth, TaskInput } from "./bandwidth";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { calculateBandwidth, normalizeTaskStatus, isOverdue, TaskInput } from "./bandwidth";
 
 const MONDAY = new Date("2025-05-05T10:00:00.000Z"); // A Monday
 
@@ -16,10 +16,72 @@ function makeTask(overrides: Partial<TaskInput> = {}): TaskInput {
   };
 }
 
+describe("normalizeTaskStatus", () => {
+  it("passes through already-canonical statuses", () => {
+    expect(normalizeTaskStatus("open")).toBe("open");
+    expect(normalizeTaskStatus("in_progress")).toBe("in_progress");
+    expect(normalizeTaskStatus("in_internal_review")).toBe("in_internal_review");
+    expect(normalizeTaskStatus("in_client_review")).toBe("in_client_review");
+    expect(normalizeTaskStatus("closed")).toBe("closed");
+  });
+
+  it("normalizes Intervals API space-separated strings", () => {
+    expect(normalizeTaskStatus("in progress")).toBe("in_progress");
+    expect(normalizeTaskStatus("in internal review")).toBe("in_internal_review");
+    expect(normalizeTaskStatus("in client review")).toBe("in_client_review");
+  });
+
+  it("is case-insensitive", () => {
+    expect(normalizeTaskStatus("In Progress")).toBe("in_progress");
+    expect(normalizeTaskStatus("OPEN")).toBe("open");
+    expect(normalizeTaskStatus("Closed")).toBe("closed");
+  });
+
+  it("falls back to 'open' for unrecognized strings", () => {
+    expect(normalizeTaskStatus("unknown")).toBe("open");
+    expect(normalizeTaskStatus("")).toBe("open");
+  });
+});
+
+describe("isOverdue", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2025-05-07T14:00:00.000Z")); // Wednesday at 2pm
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("returns false for null", () => {
+    expect(isOverdue(null)).toBe(false);
+  });
+
+  it("returns false for a task due today (day-level precision)", () => {
+    expect(isOverdue(new Date("2025-05-07T09:00:00.000Z"))).toBe(false);
+  });
+
+  it("returns false for a task due in the future", () => {
+    expect(isOverdue(new Date("2025-05-08T00:00:00.000Z"))).toBe(false);
+  });
+
+  it("returns true for a task due yesterday", () => {
+    expect(isOverdue(new Date("2025-05-06T23:59:59.000Z"))).toBe(true);
+  });
+
+  it("returns true for a task due last week", () => {
+    expect(isOverdue(new Date("2025-04-30T10:00:00.000Z"))).toBe(true);
+  });
+});
+
 describe("calculateBandwidth", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.setSystemTime(MONDAY);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it("returns 0% bandwidth for empty task list", () => {

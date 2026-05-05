@@ -24,12 +24,35 @@ export interface BandwidthResult {
   flaggedTasks: TaskInput[];
 }
 
-const QUALIFYING_STATUSES: TaskStatus[] = [
+export const QUALIFYING_STATUSES: TaskStatus[] = [
   "open",
   "in_progress",
   "in_internal_review",
   "in_client_review",
 ];
+
+const STATUS_NORMALIZATION_MAP: Record<string, TaskStatus> = {
+  open: "open",
+  "in progress": "in_progress",
+  in_progress: "in_progress",
+  "in internal review": "in_internal_review",
+  in_internal_review: "in_internal_review",
+  "in client review": "in_client_review",
+  in_client_review: "in_client_review",
+  closed: "closed",
+};
+
+export function normalizeTaskStatus(raw: string): TaskStatus {
+  return STATUS_NORMALIZATION_MAP[raw.toLowerCase()] ?? "open";
+}
+
+/** Day-level precision: a task due today is not overdue until tomorrow. */
+export function isOverdue(date: Date | null): boolean {
+  if (!date) return false;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return date < today;
+}
 
 const WORK_WEEK_HOURS = 40;
 

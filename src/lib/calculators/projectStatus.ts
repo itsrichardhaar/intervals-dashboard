@@ -1,3 +1,5 @@
+import { QUALIFYING_STATUSES } from "./bandwidth";
+
 export type AutoProjectStatus = "on_track" | "at_risk";
 
 export interface ProjectStatusInput {
@@ -19,16 +21,9 @@ function hasOverdueTasks(
   tasks: ProjectStatusInput["tasks"],
   now: Date
 ): boolean {
-  const openStatuses = [
-    "open",
-    "in_progress",
-    "in_internal_review",
-    "in_client_review",
-  ];
-
   return tasks.some((task) => {
     if (!task.dueDate) return false;
-    if (!openStatuses.includes(task.status)) return false;
+    if (!(QUALIFYING_STATUSES as string[]).includes(task.status)) return false;
     const daysOverdue = daysDiff(task.dueDate, now);
     return daysOverdue > OVERDUE_DAYS_THRESHOLD;
   });

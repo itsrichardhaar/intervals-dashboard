@@ -3,8 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { verifyCronAuth } from "@/lib/intervals/syncAuth";
 import { getResend, FROM_ADDRESS } from "@/lib/email/resend";
 import { buildDigestEmail } from "@/lib/email/mondayDigest";
-import { calculateBandwidth } from "@/lib/calculators/bandwidth";
-import type { TaskStatus } from "@/lib/calculators/bandwidth";
+import { calculateBandwidth, normalizeTaskStatus } from "@/lib/calculators/bandwidth";
 
 export async function GET(req: NextRequest) {
   if (!verifyCronAuth(req)) {
@@ -61,7 +60,7 @@ export async function GET(req: NextRequest) {
       id: t.id,
       title: t.title,
       projectName: t.project.name,
-      status: t.status as TaskStatus,
+      status: normalizeTaskStatus(t.status),
       estimatedHours: t.estimatedHours,
       loggedHours: t.loggedHours,
       dueDate: t.dueDate,
