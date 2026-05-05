@@ -1,0 +1,81 @@
+export interface EmailContent {
+  subject: string;
+  html: string;
+}
+
+export interface BudgetAlertInput {
+  projectName: string;
+  budgetPercent: number;
+  loggedHours: number;
+  estimatedHours: number;
+}
+
+export interface FlaggedTaskAlertInput {
+  assigneeName: string;
+  assigneeEmail: string;
+  taskTitle: string;
+  projectName: string;
+}
+
+/** Escape user-supplied strings before interpolating into HTML to prevent XSS. */
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#x27;");
+}
+
+export function buildBudgetAlert(input: BudgetAlertInput): EmailContent {
+  const { projectName, budgetPercent, loggedHours, estimatedHours } = input;
+  const safeProjectName = escapeHtml(projectName);
+
+  const html = `<!DOCTYPE html>
+<html><head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;background:#111827;font-family:system-ui,sans-serif">
+  <div style="max-width:600px;margin:0 auto;padding:32px 24px">
+    <div style="background:#1f2937;border-left:4px solid #eab308;border-radius:0 8px 8px 0;padding:16px 20px;margin-bottom:24px">
+      <p style="color:#9ca3af;font-size:12px;margin:0 0 4px;text-transform:uppercase;letter-spacing:0.05em">Budget alert</p>
+      <h2 style="color:#f9fafb;font-size:18px;margin:0 0 4px">${safeProjectName}</h2>
+      <p style="color:#eab308;font-size:24px;font-weight:700;margin:8px 0">${budgetPercent}% of budget used</p>
+      <p style="color:#6b7280;font-size:13px;margin:0">${loggedHours.toFixed(1)}h logged of ${estimatedHours.toFixed(1)}h estimated</p>
+    </div>
+    <p style="color:#d1d5db;font-size:14px;margin:0">This project has exceeded 80% of its estimated budget. Review scope and timeline to avoid overrun.</p>
+    <hr style="border:none;border-top:1px solid #374151;margin:32px 0">
+    <p style="color:#4b5563;font-size:12px;margin:0">Project Dashboard alert</p>
+  </div>
+</body></html>`;
+
+  return {
+    subject: `Budget alert: ${projectName} is at ${budgetPercent}%`,
+    html,
+  };
+}
+
+export function buildFlaggedTaskAlert(input: FlaggedTaskAlertInput): EmailContent {
+  const { assigneeName, taskTitle, projectName } = input;
+  const safeAssigneeName = escapeHtml(assigneeName);
+  const safeTaskTitle = escapeHtml(taskTitle);
+  const safeProjectName = escapeHtml(projectName);
+
+  const html = `<!DOCTYPE html>
+<html><head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;background:#111827;font-family:system-ui,sans-serif">
+  <div style="max-width:600px;margin:0 auto;padding:32px 24px">
+    <div style="background:#1f2937;border-left:4px solid #ef4444;border-radius:0 8px 8px 0;padding:16px 20px;margin-bottom:24px">
+      <p style="color:#9ca3af;font-size:12px;margin:0 0 4px;text-transform:uppercase;letter-spacing:0.05em">Missing estimate</p>
+      <h2 style="color:#f9fafb;font-size:18px;margin:0 0 4px">${safeTaskTitle}</h2>
+      <p style="color:#6b7280;font-size:13px;margin:0">${safeProjectName}</p>
+    </div>
+    <p style="color:#d1d5db;font-size:14px;margin:0">Hi ${safeAssigneeName}, the above task has no estimated hours. Please add an estimate in Intervals so your bandwidth can be calculated accurately.</p>
+    <hr style="border:none;border-top:1px solid #374151;margin:32px 0">
+    <p style="color:#4b5563;font-size:12px;margin:0">Project Dashboard alert</p>
+  </div>
+</body></html>`;
+
+  return {
+    subject: `Missing estimate: ${taskTitle} (${projectName})`,
+    html,
+  };
+}

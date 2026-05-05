@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.5] - 2026-05-05
+
+### Added
+- Team Timeline page (`/team/timeline`) — weekly (Mon–Fri chip grid) and monthly (expandable calendar) views, with URL-driven week/month navigation and color-coded task/milestone chips
+- `MonthlyCalendarGrid` client component — click a day to expand when more than 3 items exist
+- Monday digest cron (`/api/email/monday-digest`, 08:00 UTC every Monday) — per-user email with bandwidth %, tasks due this week, open action items, and flagged task count
+- Daily alerts cron (`/api/email/alerts`, 09:00 UTC daily) — overdue task, due-tomorrow, >80% budget, and missing-estimate alerts with `EmailSentLog` deduplication
+- Pure email composition functions: `buildDigestEmail`, `buildOverdueAlert`, `buildDueTomorrowAlert`, `buildBudgetAlert`, `buildFlaggedTaskAlert` — all HTML-escaped and covered by 43 unit tests
+- `getResend()` lazy Resend singleton and `FROM_ADDRESS` env-driven sender config
+- XSS protection: HTML-escaped all user-data interpolations in email templates
+- Auth hardening: `verifyCronAuth` now fails closed when `CRON_SECRET` is unset; uses `crypto.timingSafeEqual` for bearer token comparison
+
+Closes #29, #30, #31, #32, #33
+
+---
+
 ## [0.1.4] - 2026-05-05
 
 ### Added
