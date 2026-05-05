@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.0] - 2026-05-05
+
+### Added
+- Full Intervals sync foundation: people, projects (active-only), tasks, and time entries
+- Vercel cron jobs staggered every 15 minutes per resource
+- Auth (NextAuth v5, credentials, JWT), invite-only user management
+- Personal Home: bandwidth bar, tasks this week, flagged tasks, action items
+- Settings: invite form, team member table, manual Intervals person mapping
+
+---
+
 ## [0.0.18] - 2026-05-04
 
 ### Fixed
