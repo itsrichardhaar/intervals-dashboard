@@ -10,8 +10,8 @@ import {
   QUALIFYING_STATUSES,
   type TaskInput,
   type TaskStatus,
-  type TimeWindow,
 } from "@/lib/calculators/bandwidth";
+import { startOfCurrentWeek, isThisWeek, parseTimeWindow } from "@/lib/dates";
 import CompleteActionItemButton from "@/components/CompleteActionItemButton";
 import TimeWindowToggle from "@/components/TimeWindowToggle";
 
@@ -23,30 +23,6 @@ function formatDate(date: Date | null): string {
     month: "short",
     day: "numeric",
   });
-}
-
-function startOfCurrentWeek(): Date {
-  const now = new Date();
-  now.setHours(0, 0, 0, 0);
-  const day = now.getDay();
-  // Monday-based week
-  const diff = day === 0 ? -6 : 1 - day;
-  now.setDate(now.getDate() + diff);
-  return now;
-}
-
-function endOfCurrentWeek(): Date {
-  const start = startOfCurrentWeek();
-  const end = new Date(start);
-  end.setDate(start.getDate() + 6);
-  end.setHours(23, 59, 59, 999);
-  return end;
-}
-
-// Tasks due this week (same logic as bandwidth calculator uses)
-function isThisWeek(date: Date | null): boolean {
-  if (!date) return false;
-  return date >= startOfCurrentWeek() && date <= endOfCurrentWeek();
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -121,12 +97,7 @@ export default async function HomePage({
   if (!session?.user?.id) redirect("/login");
 
   const { window: windowParam } = await searchParams;
-  const timeWindow: TimeWindow =
-    (["weekly", "monthly", "total"] as TimeWindow[]).includes(
-      windowParam as TimeWindow
-    )
-      ? (windowParam as TimeWindow)
-      : "weekly";
+  const timeWindow = parseTimeWindow(windowParam);
 
   const userId = session.user.id;
   const firstName = session.user.name?.split(" ")[0] ?? "";

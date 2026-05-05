@@ -24,6 +24,8 @@ export interface BandwidthResult {
   flaggedTasks: TaskInput[];
 }
 
+import { startOfCurrentWeek, endOfCurrentWeek } from "@/lib/dates";
+
 export const QUALIFYING_STATUSES: TaskStatus[] = [
   "open",
   "in_progress",
@@ -60,21 +62,12 @@ function isInTimeWindow(dueDate: Date | null, window: TimeWindow): boolean {
   if (window === "total") return true;
   if (!dueDate) return false;
 
-  const now = new Date();
-
   if (window === "weekly") {
-    const startOfWeek = new Date(now);
-    startOfWeek.setHours(0, 0, 0, 0);
-    startOfWeek.setDate(now.getDate() - now.getDay() + (now.getDay() === 0 ? -6 : 1)); // Monday
-
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(startOfWeek.getDate() + 6);
-    endOfWeek.setHours(23, 59, 59, 999);
-
-    return dueDate >= startOfWeek && dueDate <= endOfWeek;
+    return dueDate >= startOfCurrentWeek() && dueDate <= endOfCurrentWeek();
   }
 
   if (window === "monthly") {
+    const now = new Date();
     return (
       dueDate.getFullYear() === now.getFullYear() &&
       dueDate.getMonth() === now.getMonth()

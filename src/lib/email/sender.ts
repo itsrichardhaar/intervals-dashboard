@@ -4,29 +4,9 @@ import { buildOverdueAlert, buildDueTomorrowAlert } from "./taskAlerts";
 import { buildBudgetAlert, buildFlaggedTaskAlert } from "./projectAlerts";
 import { buildDigestEmail } from "./mondayDigest";
 import { calculateBandwidth, normalizeTaskStatus } from "@/lib/calculators/bandwidth";
+import { todayStart, startOfCurrentWeek, endOfCurrentWeek } from "@/lib/dates";
 
 export type SendResult = "sent" | "skipped" | "error";
-
-function todayStart(): Date {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
-
-function currentWeekStart(): Date {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  const day = d.getDay();
-  d.setDate(d.getDate() - day + (day === 0 ? -6 : 1)); // ISO Monday
-  return d;
-}
-
-function currentWeekEnd(weekStart: Date): Date {
-  const d = new Date(weekStart);
-  d.setDate(weekStart.getDate() + 6);
-  d.setHours(23, 59, 59, 999);
-  return d;
-}
 
 // ── Task alerts ───────────────────────────────────────────────────────────────
 
@@ -156,8 +136,8 @@ export async function sendBudgetAlert(projectId: string): Promise<SendResult> {
 // ── Digest ────────────────────────────────────────────────────────────────────
 
 export async function sendMondayDigest(userId: string): Promise<SendResult> {
-  const weekStart = currentWeekStart();
-  const weekEnd = currentWeekEnd(weekStart);
+  const weekStart = startOfCurrentWeek();
+  const weekEnd = endOfCurrentWeek();
 
   const existing = await prisma.emailSentLog.findFirst({
     where: { userId, alertType: "monday_digest", sentAt: { gte: weekStart } },

@@ -6,8 +6,8 @@ import {
   calculateBandwidth,
   normalizeTaskStatus,
   type TaskInput,
-  type TimeWindow,
 } from "@/lib/calculators/bandwidth";
+import { parseTimeWindow } from "@/lib/dates";
 import TimeWindowToggle from "@/components/TimeWindowToggle";
 
 function BandwidthRow({
@@ -73,12 +73,7 @@ export default async function TeamBandwidthPage({
   if (!session?.user?.id) redirect("/login");
 
   const { window: windowParam } = await searchParams;
-  const timeWindow: TimeWindow =
-    (["weekly", "monthly", "total"] as TimeWindow[]).includes(
-      windowParam as TimeWindow
-    )
-      ? (windowParam as TimeWindow)
-      : "weekly";
+  const timeWindow = parseTimeWindow(windowParam);
 
   // Two queries: all users + all tasks for mapped persons
   const [users, mappings, allTasks] = await Promise.all([

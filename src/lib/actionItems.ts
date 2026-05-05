@@ -1,3 +1,5 @@
+import { startOfCurrentWeek } from "@/lib/dates";
+
 export function validateActionItemInput(data: {
   description: string;
   assigneeId: string;
@@ -9,15 +11,6 @@ export function validateActionItemInput(data: {
     return "Assignee is required";
   }
   return null;
-}
-
-function startOfCurrentWeek(): Date {
-  const now = new Date();
-  now.setHours(0, 0, 0, 0);
-  const day = now.getDay();
-  const diff = day === 0 ? -6 : 1 - day; // Monday-based
-  now.setDate(now.getDate() + diff);
-  return now;
 }
 
 export function isCarriedOver(item: {

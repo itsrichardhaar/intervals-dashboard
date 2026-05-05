@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.7] - 2026-05-05
+
+### Changed
+- Extracted `startOfCurrentWeek`, `endOfCurrentWeek`, `isThisWeek`, `todayStart`, `parseTimeWindow` into `src/lib/dates.ts`, consolidating 4 independent copies of the ISO Monday week boundary calculation
+- `bandwidth.ts` `isInTimeWindow`, home page, team bandwidth page, `actionItems.ts`, and `sender.ts` all delegate to the shared module
+- Added 16 new tests for `dates.ts` (131 total)
+
+---
+
 ## [0.1.6] - 2026-05-05
 
 ### Added
