@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { calculateProjectStatus } from "@/lib/calculators/projectStatus";
 import ProjectStatusControl from "@/components/ProjectStatusControl";
@@ -10,21 +11,32 @@ function BudgetBar({ logged, estimated }: { logged: number; estimated: number })
   if (estimated === 0) {
     return <span className="text-gray-600 text-xs">No estimates</span>;
   }
-  const pct = Math.min(100, Math.round((logged / estimated) * 100));
-  const barColor =
-    pct >= 90 ? "bg-red-500" : pct >= 80 ? "bg-yellow-400" : "bg-green-500";
+  const rawPct = Math.round((logged / estimated) * 100);
+  const overBudget = rawPct > 100;
+  const barPct = Math.min(100, rawPct);
+  const barColor = overBudget
+    ? "bg-red-500"
+    : rawPct >= 90
+      ? "bg-red-500"
+      : rawPct >= 80
+        ? "bg-yellow-400"
+        : "bg-green-500";
+  const textColor = overBudget ? "text-red-400" : "text-gray-400";
 
   return (
     <div className="space-y-1 min-w-[8rem]">
-      <div className="flex items-center justify-between text-xs text-gray-400 tabular-nums">
+      <div className={`flex items-center justify-between text-xs tabular-nums ${textColor}`}>
         <span>
           {logged.toFixed(0)}h / {estimated.toFixed(0)}h
         </span>
-        <span>{pct}%</span>
+        <span className={overBudget ? "font-medium" : ""}>{rawPct}%</span>
       </div>
       <div className="w-full bg-gray-800 rounded-full h-1.5 overflow-hidden">
-        <div className={`h-1.5 rounded-full ${barColor}`} style={{ width: `${pct}%` }} />
+        <div className={`h-1.5 rounded-full ${barColor}`} style={{ width: `${barPct}%` }} />
       </div>
+      {overBudget && (
+        <p className="text-xs text-red-400/70">Over budget</p>
+      )}
     </div>
   );
 }
@@ -113,7 +125,12 @@ export default async function ProjectsPage() {
             {enriched.map((p) => (
               <tr key={p.id} className="bg-gray-950 hover:bg-gray-900 transition-colors">
                 <td className="px-4 py-3">
-                  <p className="text-white font-medium leading-snug">{p.name}</p>
+                  <Link
+                    href={`/projects/${p.id}`}
+                    className="text-white font-medium leading-snug hover:text-blue-300 transition-colors"
+                  >
+                    {p.name}
+                  </Link>
                   {p.clientName && (
                     <p className="text-gray-500 text-xs mt-0.5 md:hidden">{p.clientName}</p>
                   )}

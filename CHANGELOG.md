@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.2] - 2026-05-05
+
+### Added
+- Individual project page (`/projects/[id]`) — tasks grouped by assignee with flagged/overdue highlighting, budget bar, action items, and status update feed
+- `AddWeeklyStatusUpdateForm` — inline form to post On Track / At Risk / Blocked updates with free-text summary
+- `AddActionItemForm` — inline form to create action items with assignee and optional due date
+- `POST /api/projects/[id]/weekly-updates` — creates a `WeeklyStatusUpdate` record; validates status allowlist and requires non-empty summary
+- `POST /api/projects/[id]/action-items` — creates an `ActionItem` tied to the project; validates assignee exists
+- `PATCH /api/action-items/[id]` — any team member can now mark an action item complete (relaxed from assignee-only)
+- 12 new unit tests for `validateWeeklyUpdateInput`, `getLatestUpdates`, and `validateActionItemInput`
+- Project names in the overview table link to individual project pages
+
+Closes #19, #20, #24
+
+---
+
 ## [0.1.1] - 2026-05-05
 
 ### Added

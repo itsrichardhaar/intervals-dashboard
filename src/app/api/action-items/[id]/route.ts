@@ -18,11 +18,6 @@ export async function PATCH(
     return NextResponse.json({ error: "Action item not found." }, { status: 404 });
   }
 
-  // Only the assignee can complete their own action items
-  if (item.assigneeId !== session.user.id) {
-    return NextResponse.json({ error: "Forbidden." }, { status: 403 });
-  }
-
   const updated = await prisma.actionItem.update({
     where: { id },
     data: { completedAt: new Date() },
