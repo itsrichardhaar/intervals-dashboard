@@ -1,5 +1,10 @@
 import { Resend } from "resend";
 
+export interface EmailContent {
+  subject: string;
+  html: string;
+}
+
 let _resend: Resend | null = null;
 
 export function getResend(): Resend {

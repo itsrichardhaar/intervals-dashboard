@@ -1,7 +1,6 @@
-export interface EmailContent {
-  subject: string;
-  html: string;
-}
+import { escapeHtml } from "./escape";
+import type { EmailContent } from "./resend";
+export type { EmailContent };
 
 export interface BudgetAlertInput {
   projectName: string;
@@ -15,16 +14,6 @@ export interface FlaggedTaskAlertInput {
   assigneeEmail: string;
   taskTitle: string;
   projectName: string;
-}
-
-/** Escape user-supplied strings before interpolating into HTML to prevent XSS. */
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#x27;");
 }
 
 export function buildBudgetAlert(input: BudgetAlertInput): EmailContent {

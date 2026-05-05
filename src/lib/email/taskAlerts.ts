@@ -1,3 +1,7 @@
+import { escapeHtml } from "./escape";
+import type { EmailContent } from "./resend";
+export type { EmailContent };
+
 export interface AlertTask {
   title: string;
   projectName: string;
@@ -8,21 +12,6 @@ export interface AlertInput {
   assigneeName: string;
   assigneeEmail: string;
   task: AlertTask;
-}
-
-export interface EmailContent {
-  subject: string;
-  html: string;
-}
-
-/** Escape user-supplied strings before interpolating into HTML to prevent XSS. */
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#x27;");
 }
 
 function formatDate(d: Date): string {
