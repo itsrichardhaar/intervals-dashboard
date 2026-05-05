@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.10] - 2026-05-05
+
+### Fixed
+- Deleted boilerplate `src/app/page.tsx` that was shadowing `(dashboard)/page.tsx` — Personal Home now loads correctly at `/`
+- Removed erroneous `prisma` import from `Sidebar.tsx` (client component)
+
+### Added
+- `GET /my-work/tasks` — All My Tasks: full table of tasks assigned to the user, overdue highlighted, Open/All toggle
+- `GET /my-work/action-items` — My Action Items: open items with overdue/carried-over badges, complete button, recently completed section
+- `GET /my-work` redirects to `/my-work/tasks`
+
+---
+
 ## [0.1.9] - 2026-05-05
 
 ### Changed

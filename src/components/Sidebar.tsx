@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { prisma } from "@/lib/prisma";
 
 interface SidebarProps {
   user: { name?: string | null; email?: string | null };
