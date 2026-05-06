@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.15] - 2026-05-05
+
+### Added
+- `/daily-focus` page — logged-in user's Open and In Progress tasks, sorted overdue-first then ascending by due date with no-due-date tasks last
+- "No due date" badge on undated tasks; "Due today" highlight in yellow; overdue row highlight in red
+- `sortDailyFocusTasks` pure function with 9 unit tests (172 total)
+- Daily Focus nav item in sidebar (added in v0.1.12, route now implemented)
+
+---
+
 ## [0.1.14] - 2026-05-05
 
 ### Added
