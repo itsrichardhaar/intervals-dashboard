@@ -17,7 +17,7 @@ function formatDate(date: Date | null): string {
 
 function StatusBadge({ status }: { status: TaskStatus | "closed" }) {
   const styles: Record<string, string> = {
-    open: "bg-gray-700 text-gray-300",
+    open: "bg-dash-surface-2 text-dash-text-muted",
     in_progress: "bg-blue-900/60 text-blue-300",
     in_internal_review: "bg-purple-900/60 text-purple-300",
     in_client_review: "bg-indigo-900/60 text-indigo-300",
@@ -31,7 +31,7 @@ function StatusBadge({ status }: { status: TaskStatus | "closed" }) {
     closed: "Closed",
   };
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${styles[status] ?? "bg-gray-700 text-gray-300"}`}>
+    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${styles[status] ?? "bg-dash-surface-2 text-dash-text-muted"}`}>
       {labels[status] ?? status}
     </span>
   );
@@ -90,8 +90,8 @@ export default async function AllMyTasksPage({
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold text-white mb-1">All My Tasks</h1>
-          <p className="text-gray-500 text-sm">
+          <h1 className="text-xl font-semibold text-dash-text mb-1">All My Tasks</h1>
+          <p className="text-dash-text-dim text-sm">
             {openCount} open task{openCount !== 1 ? "s" : ""}
             {overdueCount > 0 && (
               <span className="ml-2 text-red-400">{overdueCount} overdue</span>
@@ -102,7 +102,7 @@ export default async function AllMyTasksPage({
           <a
             href="/my-work/tasks"
             className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${
-              !showClosed ? "bg-gray-700 text-white" : "text-gray-400 hover:bg-gray-800"
+              !showClosed ? "bg-dash-inset text-dash-text" : "text-dash-text-muted hover:bg-dash-surface-2"
             }`}
           >
             Open
@@ -110,7 +110,7 @@ export default async function AllMyTasksPage({
           <a
             href="/my-work/tasks?show=all"
             className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${
-              showClosed ? "bg-gray-700 text-white" : "text-gray-400 hover:bg-gray-800"
+              showClosed ? "bg-dash-inset text-dash-text" : "text-dash-text-muted hover:bg-dash-surface-2"
             }`}
           >
             All
@@ -134,31 +134,31 @@ export default async function AllMyTasksPage({
       {/* Task table */}
       {mapping && (
         tasks.length === 0 ? (
-          <p className="text-gray-600 text-sm">
+          <p className="text-dash-text-dim text-sm">
             {showClosed ? "No tasks assigned to you." : "No open tasks — you're all clear."}
           </p>
         ) : (
-          <div className="rounded-lg border border-gray-800 overflow-hidden">
+          <div className="rounded-lg border border-dash-border overflow-hidden">
             <table className="w-full text-sm">
-              <thead className="bg-gray-900">
+              <thead className="bg-dash-surface">
                 <tr>
-                  <th className="text-left px-4 py-3 text-gray-400 font-medium">Task</th>
-                  <th className="text-left px-4 py-3 text-gray-400 font-medium hidden sm:table-cell">Project</th>
-                  <th className="text-left px-4 py-3 text-gray-400 font-medium">Status</th>
-                  <th className="text-left px-4 py-3 text-gray-400 font-medium hidden md:table-cell">Due</th>
-                  <th className="text-right px-4 py-3 text-gray-400 font-medium hidden lg:table-cell">Est / Logged</th>
+                  <th className="text-left px-4 py-3 text-dash-text-muted font-medium">Task</th>
+                  <th className="text-left px-4 py-3 text-dash-text-muted font-medium hidden sm:table-cell">Project</th>
+                  <th className="text-left px-4 py-3 text-dash-text-muted font-medium">Status</th>
+                  <th className="text-left px-4 py-3 text-dash-text-muted font-medium hidden md:table-cell">Due</th>
+                  <th className="text-right px-4 py-3 text-dash-text-muted font-medium hidden lg:table-cell">Est / Logged</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-800">
+              <tbody className="divide-y divide-dash-border">
                 {tasks.map((task) => {
                   const overdue = isOverdue(task.dueDate) && QUALIFYING_STATUSES.includes(task.normalizedStatus);
                   return (
                     <tr
                       key={task.id}
-                      className={`${overdue ? "bg-red-950/30" : "bg-gray-950"} hover:bg-gray-900`}
+                      className={`${overdue ? "bg-red-950/30" : "bg-dash-bg"} hover:bg-dash-surface`}
                     >
                       <td className="px-4 py-3">
-                        <span className={`font-medium ${overdue ? "text-red-300" : "text-white"}`}>
+                        <span className={`font-medium ${overdue ? "text-red-300" : "text-dash-text"}`}>
                           {task.title}
                         </span>
                         {!task.estimatedHours && QUALIFYING_STATUSES.includes(task.normalizedStatus) && (
@@ -167,12 +167,12 @@ export default async function AllMyTasksPage({
                           </span>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-gray-400 hidden sm:table-cell">{task.project.name}</td>
+                      <td className="px-4 py-3 text-dash-text-muted hidden sm:table-cell">{task.project.name}</td>
                       <td className="px-4 py-3">
                         <StatusBadge status={task.normalizedStatus} />
                       </td>
                       <td className="px-4 py-3 hidden md:table-cell">
-                        <span className={overdue ? "text-red-400 font-medium" : "text-gray-400"}>
+                        <span className={overdue ? "text-red-400 font-medium" : "text-dash-text-muted"}>
                           {formatDate(task.dueDate)}
                         </span>
                         {overdue && (
@@ -181,7 +181,7 @@ export default async function AllMyTasksPage({
                           </span>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-right text-gray-400 hidden lg:table-cell tabular-nums">
+                      <td className="px-4 py-3 text-right text-dash-text-muted hidden lg:table-cell tabular-nums">
                         {task.estimatedHours !== null ? `${task.estimatedHours}h` : "—"}
                         {" / "}
                         {task.loggedHours > 0 ? `${task.loggedHours}h` : "0h"}

@@ -29,18 +29,18 @@ function BandwidthRow({
   const textColor = bandwidthTextColor(percent);
 
   return (
-    <tr className="bg-gray-950 hover:bg-gray-900 transition-colors">
+    <tr className="bg-dash-bg hover:bg-dash-surface transition-colors">
       <td className="px-4 py-4">
-        <p className="text-white font-medium text-sm">{name ?? email}</p>
-        {name && <p className="text-gray-600 text-xs mt-0.5">{email}</p>}
+        <p className="text-dash-text font-medium text-sm">{name ?? email}</p>
+        {name && <p className="text-dash-text-dim text-xs mt-0.5">{email}</p>}
       </td>
       <td className="px-4 py-4 w-[40%]">
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-xs">
             <span className={`font-semibold tabular-nums ${textColor}`}>{percent}%</span>
-            <span className="text-gray-500 tabular-nums">{available}% available</span>
+            <span className="text-dash-text-dim tabular-nums">{available}% available</span>
           </div>
-          <div className="w-full bg-gray-800 rounded-full h-2 overflow-hidden">
+          <div className="w-full bg-dash-surface-2 rounded-full h-2 overflow-hidden">
             <div
               className={`h-2 rounded-full ${color} transition-all`}
               style={{ width: `${percent}%` }}
@@ -49,10 +49,10 @@ function BandwidthRow({
         </div>
       </td>
       <td className="px-4 py-4 text-right hidden md:table-cell">
-        <span className="text-sm tabular-nums text-gray-300">
+        <span className="text-sm tabular-nums text-dash-text">
           {remaining.toFixed(1)}h
         </span>
-        <p className="text-xs text-gray-600">remaining</p>
+        <p className="text-xs text-dash-text-dim">remaining</p>
       </td>
     </tr>
   );
@@ -137,8 +137,8 @@ export default async function TeamBandwidthPage({
     <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold text-white mb-1">Team Bandwidth</h1>
-          <p className="text-gray-500 text-sm">
+          <h1 className="text-xl font-semibold text-dash-text mb-1">Team Bandwidth</h1>
+          <p className="text-dash-text-dim text-sm">
             {linked.length} linked member{linked.length !== 1 ? "s" : ""} ·{" "}
             remaining capacity {windowLabel}
           </p>
@@ -149,22 +149,22 @@ export default async function TeamBandwidthPage({
       </div>
 
       {linked.length > 0 && (
-        <div className="rounded-lg border border-gray-800 overflow-hidden">
+        <div className="rounded-lg border border-dash-border overflow-hidden">
           <table className="w-full">
-            <thead className="bg-gray-900">
+            <thead className="bg-dash-surface">
               <tr>
-                <th className="text-left px-4 py-3 text-gray-400 text-sm font-medium">
+                <th className="text-left px-4 py-3 text-dash-text-muted text-sm font-medium">
                   Team member
                 </th>
-                <th className="text-left px-4 py-3 text-gray-400 text-sm font-medium w-[40%]">
+                <th className="text-left px-4 py-3 text-dash-text-muted text-sm font-medium w-[40%]">
                   Bandwidth
                 </th>
-                <th className="text-right px-4 py-3 text-gray-400 text-sm font-medium hidden md:table-cell">
+                <th className="text-right px-4 py-3 text-dash-text-muted text-sm font-medium hidden md:table-cell">
                   Remaining
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-800">
+            <tbody className="divide-y divide-dash-border">
               {linked.map(({ user, bandwidth }) => (
                 <BandwidthRow
                   key={user.id}
@@ -182,22 +182,22 @@ export default async function TeamBandwidthPage({
 
       {unlinked.length > 0 && (
         <section>
-          <h2 className="text-sm font-medium text-gray-400 uppercase tracking-wide mb-3">
+          <h2 className="text-sm font-medium text-dash-text-muted uppercase tracking-wide mb-3">
             Not linked to Intervals
           </h2>
-          <div className="rounded-lg border border-gray-800 divide-y divide-gray-800 overflow-hidden">
+          <div className="rounded-lg border border-dash-border divide-y divide-dash-border overflow-hidden">
             {unlinked.map(({ user }) => (
               <div
                 key={user.id}
-                className="flex items-center justify-between px-4 py-3 bg-gray-950"
+                className="flex items-center justify-between px-4 py-3 bg-dash-bg"
               >
                 <div>
-                  <p className="text-gray-400 text-sm">{user.name ?? user.email}</p>
+                  <p className="text-dash-text-muted text-sm">{user.name ?? user.email}</p>
                   {user.name && (
-                    <p className="text-gray-600 text-xs">{user.email}</p>
+                    <p className="text-dash-text-dim text-xs">{user.email}</p>
                   )}
                 </div>
-                <span className="text-xs text-gray-600 bg-gray-800 px-2 py-1 rounded">
+                <span className="text-xs text-dash-text-dim bg-dash-surface-2 px-2 py-1 rounded">
                   No Intervals mapping
                 </span>
               </div>

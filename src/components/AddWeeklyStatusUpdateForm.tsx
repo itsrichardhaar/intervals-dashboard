@@ -7,8 +7,8 @@ type Status = "on_track" | "at_risk" | "blocked";
 
 const STATUS_OPTIONS: { value: Status; label: string }[] = [
   { value: "on_track", label: "On Track" },
-  { value: "at_risk",  label: "At Risk" },
-  { value: "blocked",  label: "Blocked" },
+  { value: "at_risk",  label: "At Risk"  },
+  { value: "blocked",  label: "Blocked"  },
 ];
 
 interface Props {
@@ -49,7 +49,7 @@ export default function AddWeeklyStatusUpdateForm({ projectId }: Props) {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="text-xs text-gray-500 hover:text-white border border-gray-700 hover:border-gray-500 px-3 py-1.5 rounded-md transition-colors"
+        className="text-xs text-dash-text-dim hover:text-dash-text border border-dash-border hover:border-dash-text-dim px-3 py-1.5 rounded-md transition-colors"
       >
         + Add status update
       </button>
@@ -57,13 +57,13 @@ export default function AddWeeklyStatusUpdateForm({ projectId }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-gray-900 border border-gray-700 rounded-lg p-4 space-y-3">
+    <form onSubmit={handleSubmit} className="bg-dash-surface border border-dash-border rounded-lg p-4 space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-sm font-medium text-white">New status update</p>
+        <p className="text-sm font-medium text-dash-text">New status update</p>
         <button
           type="button"
           onClick={() => { setIsOpen(false); setError(null); setSummary(""); }}
-          className="text-gray-500 hover:text-white text-xs"
+          className="text-dash-text-dim hover:text-dash-text text-xs"
         >
           Cancel
         </button>
@@ -82,7 +82,7 @@ export default function AddWeeklyStatusUpdateForm({ projectId }: Props) {
                   : opt.value === "at_risk"
                     ? "bg-yellow-900/50 text-yellow-300 border-yellow-700"
                     : "bg-red-900/50 text-red-300 border-red-700"
-                : "text-gray-400 border-gray-700 hover:border-gray-500"
+                : "text-dash-text-muted border-dash-border hover:border-dash-text-dim"
             }`}
           >
             {opt.label}
@@ -95,7 +95,7 @@ export default function AddWeeklyStatusUpdateForm({ projectId }: Props) {
         onChange={(e) => setSummary(e.target.value)}
         placeholder="What happened this week? Any blockers?"
         rows={3}
-        className="w-full text-sm bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-white placeholder-gray-500 resize-none focus:outline-none focus:border-gray-500"
+        className="w-full text-sm bg-dash-surface-2 border border-dash-border rounded-md px-3 py-2 text-dash-text placeholder-dash-text-dim resize-none focus:outline-none focus:border-dash-text-dim"
         autoFocus
       />
 
@@ -105,7 +105,7 @@ export default function AddWeeklyStatusUpdateForm({ projectId }: Props) {
         <button
           type="submit"
           disabled={!summary.trim() || isPending}
-          className="text-xs bg-gray-700 hover:bg-gray-600 disabled:opacity-40 text-white px-4 py-1.5 rounded-md transition-colors"
+          className="text-xs bg-dash-inset hover:bg-dash-surface-2 disabled:opacity-40 text-dash-text px-4 py-1.5 rounded-md transition-colors"
         >
           {isPending ? "Saving…" : "Post update"}
         </button>

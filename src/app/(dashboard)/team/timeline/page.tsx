@@ -79,7 +79,7 @@ const COLOR_CLASSES: Record<ItemColor, string> = {
   green:  "bg-green-900/40 text-green-300 border border-green-800/50",
   yellow: "bg-yellow-900/40 text-yellow-300 border border-yellow-800/50",
   red:    "bg-red-900/40 text-red-300 border border-red-800/50",
-  gray:   "bg-gray-800/60 text-gray-500",
+  gray:   "bg-dash-surface-2/80 text-dash-text-dim",
 };
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -208,36 +208,36 @@ export default async function TimelinePage({
         {/* Header + toggle */}
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="text-xl font-semibold text-white mb-1">Timeline</h1>
-            <p className="text-gray-500 text-sm">
+            <h1 className="text-xl font-semibold text-dash-text mb-1">Timeline</h1>
+            <p className="text-dash-text-dim text-sm">
               Week of {weekStart.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <div className="inline-flex bg-gray-800 rounded-lg p-0.5">
-              <Link href="?view=weekly" className="px-3 py-1 rounded-md text-xs font-medium bg-gray-700 text-white">
+            <div className="inline-flex bg-dash-surface-2 rounded-lg p-0.5">
+              <Link href="?view=weekly" className="px-3 py-1 rounded-md text-xs font-medium bg-dash-inset text-dash-text">
                 Week
               </Link>
-              <Link href={`?view=monthly&month=${isoMonth(today.getFullYear(), today.getMonth())}`} className="px-3 py-1 rounded-md text-xs font-medium text-gray-400 hover:text-white transition-colors">
+              <Link href={`?view=monthly&month=${isoMonth(today.getFullYear(), today.getMonth())}`} className="px-3 py-1 rounded-md text-xs font-medium text-dash-text-muted hover:text-dash-text transition-colors">
                 Month
               </Link>
             </div>
             <div className="flex items-center gap-1">
               <Link
                 href={`?view=weekly&week=${prevWeekParam}`}
-                className="px-2 py-1 text-sm text-gray-400 hover:text-white bg-gray-800 hover:bg-gray-700 rounded-md transition-colors"
+                className="px-2 py-1 text-sm text-dash-text-muted hover:text-dash-text bg-dash-surface-2 hover:bg-dash-inset rounded-md transition-colors"
               >
                 ←
               </Link>
               <Link
                 href="?view=weekly"
-                className="px-3 py-1 text-xs text-gray-400 hover:text-white bg-gray-800 hover:bg-gray-700 rounded-md transition-colors"
+                className="px-3 py-1 text-xs text-dash-text-muted hover:text-dash-text bg-dash-surface-2 hover:bg-dash-inset rounded-md transition-colors"
               >
                 Today
               </Link>
               <Link
                 href={`?view=weekly&week=${nextWeekParam}`}
-                className="px-2 py-1 text-sm text-gray-400 hover:text-white bg-gray-800 hover:bg-gray-700 rounded-md transition-colors"
+                className="px-2 py-1 text-sm text-dash-text-muted hover:text-dash-text bg-dash-surface-2 hover:bg-dash-inset rounded-md transition-colors"
               >
                 →
               </Link>
@@ -246,7 +246,7 @@ export default async function TimelinePage({
         </div>
 
         {/* Week grid */}
-        <div className="grid grid-cols-5 gap-px bg-gray-800 rounded-lg overflow-hidden min-h-[400px]">
+        <div className="grid grid-cols-5 gap-px bg-dash-border rounded-lg overflow-hidden min-h-[400px]">
           {weekDays.map((day, idx) => {
             const isToday = day.toDateString() === today.toDateString();
             const items = dayBuckets[idx];
@@ -254,11 +254,11 @@ export default async function TimelinePage({
             return (
               <div
                 key={day.toISOString()}
-                className={`flex flex-col bg-gray-950 ${isToday ? "ring-1 ring-inset ring-blue-700" : ""}`}
+                className={`flex flex-col bg-dash-bg ${isToday ? "ring-1 ring-inset ring-blue-700" : ""}`}
               >
                 {/* Day header */}
-                <div className={`px-3 py-2 border-b border-gray-800 ${isToday ? "bg-blue-950/30" : "bg-gray-900"}`}>
-                  <p className={`text-xs font-medium ${isToday ? "text-blue-400" : "text-gray-400"}`}>
+                <div className={`px-3 py-2 border-b border-dash-border ${isToday ? "bg-blue-950/30" : "bg-dash-surface"}`}>
+                  <p className={`text-xs font-medium ${isToday ? "text-blue-400" : "text-dash-text-muted"}`}>
                     {fmtDayHeader(day)}
                   </p>
                 </div>
@@ -266,7 +266,7 @@ export default async function TimelinePage({
                 {/* Items */}
                 <div className="flex-1 p-2 space-y-1 overflow-y-auto">
                   {items.length === 0 ? (
-                    <p className="text-gray-700 text-xs px-1 pt-1">—</p>
+                    <p className="text-dash-text-dim text-xs px-1 pt-1">—</p>
                   ) : (
                     items.map((item) => (
                       <Link
@@ -291,7 +291,7 @@ export default async function TimelinePage({
         </div>
 
         {/* Legend */}
-        <div className="flex items-center gap-4 text-xs text-gray-500">
+        <div className="flex items-center gap-4 text-xs text-dash-text-dim">
           <span className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-sm bg-green-900/60 border border-green-800/50 inline-block" />
             On track
@@ -305,7 +305,7 @@ export default async function TimelinePage({
             Overdue
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-sm bg-gray-800 inline-block" />
+            <span className="w-2.5 h-2.5 rounded-sm bg-dash-surface-2 inline-block" />
             Closed
           </span>
           <span className="flex items-center gap-1.5">
@@ -358,34 +358,34 @@ export default async function TimelinePage({
       {/* Header + toggle */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-xl font-semibold text-white mb-1">Timeline</h1>
-          <p className="text-gray-500 text-sm">{fmtMonthTitle(monthYear, monthMonth)}</p>
+          <h1 className="text-xl font-semibold text-dash-text mb-1">Timeline</h1>
+          <p className="text-dash-text-dim text-sm">{fmtMonthTitle(monthYear, monthMonth)}</p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="inline-flex bg-gray-800 rounded-lg p-0.5">
-            <Link href="?view=weekly" className="px-3 py-1 rounded-md text-xs font-medium text-gray-400 hover:text-white transition-colors">
+          <div className="inline-flex bg-dash-surface-2 rounded-lg p-0.5">
+            <Link href="?view=weekly" className="px-3 py-1 rounded-md text-xs font-medium text-dash-text-muted hover:text-dash-text transition-colors">
               Week
             </Link>
-            <Link href={`?view=monthly&month=${isoMonth(monthYear, monthMonth)}`} className="px-3 py-1 rounded-md text-xs font-medium bg-gray-700 text-white">
+            <Link href={`?view=monthly&month=${isoMonth(monthYear, monthMonth)}`} className="px-3 py-1 rounded-md text-xs font-medium bg-dash-inset text-dash-text">
               Month
             </Link>
           </div>
           <div className="flex items-center gap-1">
             <Link
               href={`?view=monthly&month=${prevMonthParam}`}
-              className="px-2 py-1 text-sm text-gray-400 hover:text-white bg-gray-800 hover:bg-gray-700 rounded-md transition-colors"
+              className="px-2 py-1 text-sm text-dash-text-muted hover:text-dash-text bg-dash-surface-2 hover:bg-dash-inset rounded-md transition-colors"
             >
               ←
             </Link>
             <Link
               href={`?view=monthly&month=${isoMonth(today.getFullYear(), today.getMonth())}`}
-              className="px-3 py-1 text-xs text-gray-400 hover:text-white bg-gray-800 hover:bg-gray-700 rounded-md transition-colors"
+              className="px-3 py-1 text-xs text-dash-text-muted hover:text-dash-text bg-dash-surface-2 hover:bg-dash-inset rounded-md transition-colors"
             >
               Today
             </Link>
             <Link
               href={`?view=monthly&month=${nextMonthParam}`}
-              className="px-2 py-1 text-sm text-gray-400 hover:text-white bg-gray-800 hover:bg-gray-700 rounded-md transition-colors"
+              className="px-2 py-1 text-sm text-dash-text-muted hover:text-dash-text bg-dash-surface-2 hover:bg-dash-inset rounded-md transition-colors"
             >
               →
             </Link>
@@ -396,7 +396,7 @@ export default async function TimelinePage({
       <MonthlyCalendarGrid year={monthYear} month={monthMonth} items={calendarItems} />
 
       {/* Legend */}
-      <div className="flex items-center gap-4 text-xs text-gray-500">
+      <div className="flex items-center gap-4 text-xs text-dash-text-dim">
         <span className="flex items-center gap-1.5">
           <span className="w-2.5 h-2.5 rounded-sm bg-green-900/60 inline-block" />
           On track
@@ -410,7 +410,7 @@ export default async function TimelinePage({
           Overdue
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-sm bg-gray-800 inline-block" />
+          <span className="w-2.5 h-2.5 rounded-sm bg-dash-surface-2 inline-block" />
           Closed
         </span>
         <span className="flex items-center gap-1.5">

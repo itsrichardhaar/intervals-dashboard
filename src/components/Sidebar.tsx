@@ -3,52 +3,65 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
+import {
+  Home,
+  FolderOpen,
+  Users,
+  ListChecks,
+  Settings,
+  Target,
+} from "lucide-react";
+import ThemeToggle from "@/components/ThemeToggle";
 
 interface SidebarProps {
   user: { name?: string | null; email?: string | null };
 }
 
 const NAV = [
-  { label: "Home", href: "/", icon: "⌂" },
-  { label: "Projects", href: "/projects", icon: "◫", children: [
-    { label: "Overview", href: "/projects" },
-    { label: "Archive", href: "/projects/archive" },
+  { label: "Home",        href: "/",            icon: Home },
+  { label: "Daily Focus", href: "/daily-focus",  icon: Target },
+  { label: "Projects",    href: "/projects",     icon: FolderOpen, children: [
+    { label: "Overview", href: "/projects"         },
+    { label: "Archive",  href: "/projects/archive" },
   ]},
-  { label: "Team", href: "/team", icon: "◈", children: [
+  { label: "Team",        href: "/team",         icon: Users, children: [
     { label: "Bandwidth", href: "/team/bandwidth" },
-    { label: "Timeline", href: "/team/timeline" },
+    { label: "Timeline",  href: "/team/timeline"  },
   ]},
-  { label: "My Work", href: "/my-work", icon: "✓", children: [
-    { label: "All My Tasks", href: "/my-work/tasks" },
+  { label: "My Work",     href: "/my-work",      icon: ListChecks, children: [
+    { label: "All My Tasks",    href: "/my-work/tasks"        },
     { label: "My Action Items", href: "/my-work/action-items" },
   ]},
-  { label: "Settings", href: "/settings", icon: "⚙" },
+  { label: "Settings",    href: "/settings",     icon: Settings },
 ];
 
 export default function Sidebar({ user }: SidebarProps) {
   const pathname = usePathname();
 
   return (
-    <aside className="w-56 bg-gray-900 border-r border-gray-800 flex flex-col shrink-0">
-      <div className="px-4 py-5 border-b border-gray-800">
-        <p className="text-sm font-semibold text-white truncate">Project Dashboard</p>
-        <p className="text-xs text-gray-500 truncate mt-0.5">{user.email}</p>
+    <aside className="w-56 bg-dash-surface border-r border-dash-border flex flex-col shrink-0">
+      <div className="px-4 py-5 border-b border-dash-border">
+        <p className="text-sm font-semibold text-dash-text truncate">Project Dashboard</p>
+        <p className="text-xs text-dash-text-dim truncate mt-0.5">{user.email}</p>
       </div>
 
       <nav className="flex-1 px-2 py-3 space-y-0.5 overflow-y-auto">
         {NAV.map((item) => {
-          const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+          const Icon = item.icon;
+          const isActive =
+            pathname === item.href ||
+            (item.href !== "/" && pathname.startsWith(item.href + "/"));
           return (
             <div key={item.href}>
               <Link
                 href={item.href}
                 className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${
                   isActive
-                    ? "bg-gray-800 text-white"
-                    : "text-gray-400 hover:bg-gray-800 hover:text-white"
+                    ? "bg-dash-surface-2 text-dash-accent"
+                    : "text-dash-text-muted hover:bg-dash-surface-2 hover:text-dash-text"
                 }`}
               >
-                <span className="text-base w-4 text-center">{item.icon}</span>
+                <Icon size={15} className="shrink-0" />
                 {item.label}
               </Link>
               {item.children && (
@@ -61,8 +74,8 @@ export default function Sidebar({ user }: SidebarProps) {
                         href={child.href}
                         className={`block px-3 py-1.5 rounded-md text-xs transition-colors ${
                           childActive
-                            ? "bg-gray-800 text-white"
-                            : "text-gray-500 hover:bg-gray-800 hover:text-gray-300"
+                            ? "bg-dash-surface-2 text-dash-accent"
+                            : "text-dash-text-dim hover:bg-dash-surface-2 hover:text-dash-text-muted"
                         }`}
                       >
                         {child.label}
@@ -76,14 +89,17 @@ export default function Sidebar({ user }: SidebarProps) {
         })}
       </nav>
 
-      <div className="px-4 py-3 border-t border-gray-800">
-        <p className="text-xs text-gray-500 truncate mb-2">{user.name ?? user.email}</p>
-        <button
-          onClick={() => signOut({ callbackUrl: "/login" })}
-          className="text-xs text-gray-500 hover:text-red-400 transition-colors"
-        >
-          Sign out
-        </button>
+      <div className="px-3 py-3 border-t border-dash-border space-y-2">
+        <ThemeToggle />
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-dash-text-dim truncate">{user.name ?? user.email}</p>
+          <button
+            onClick={() => signOut({ callbackUrl: "/login" })}
+            className="text-xs text-dash-text-dim hover:text-red-400 transition-colors shrink-0 ml-2"
+          >
+            Sign out
+          </button>
+        </div>
       </div>
     </aside>
   );

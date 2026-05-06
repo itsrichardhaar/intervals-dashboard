@@ -4,8 +4,8 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import type { TimeWindow } from "@/lib/calculators/bandwidth";
 
 const OPTIONS: { value: TimeWindow; label: string }[] = [
-  { value: "weekly",    label: "This Week" },
-  { value: "monthly",   label: "This Month" },
+  { value: "weekly",    label: "This Week"    },
+  { value: "monthly",   label: "This Month"   },
   { value: "quarterly", label: "This Quarter" },
 ];
 
@@ -25,15 +25,15 @@ export default function TimeWindowToggle({ current }: Props) {
   }
 
   return (
-    <div className="inline-flex bg-gray-800 rounded-lg p-0.5 gap-0.5">
+    <div className="inline-flex bg-dash-surface-2 rounded-lg p-0.5 gap-0.5">
       {OPTIONS.map((opt) => (
         <button
           key={opt.value}
           onClick={() => select(opt.value)}
           className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
             current === opt.value
-              ? "bg-gray-700 text-white"
-              : "text-gray-400 hover:text-white"
+              ? "bg-dash-inset text-dash-text"
+              : "text-dash-text-muted hover:text-dash-text"
           }`}
         >
           {opt.label}

@@ -58,9 +58,9 @@ export default async function ProjectArchivePage({
   }
 
   function SortArrow({ field }: { field: string }) {
-    if (sortBy !== field) return <span className="text-gray-700 ml-1">↕</span>;
+    if (sortBy !== field) return <span className="text-dash-text-dim ml-1">↕</span>;
     return (
-      <span className="text-gray-400 ml-1">{sortOrder === "asc" ? "↑" : "↓"}</span>
+      <span className="text-dash-text-muted ml-1">{sortOrder === "asc" ? "↑" : "↓"}</span>
     );
   }
 
@@ -71,13 +71,13 @@ export default async function ProjectArchivePage({
           <div className="flex items-center gap-3 mb-1">
             <Link
               href="/projects"
-              className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+              className="text-xs text-dash-text-dim hover:text-dash-text transition-colors"
             >
               ← Active Projects
             </Link>
           </div>
-          <h1 className="text-xl font-semibold text-white">Project Archive</h1>
-          <p className="text-gray-500 text-sm mt-0.5">
+          <h1 className="text-xl font-semibold text-dash-text">Project Archive</h1>
+          <p className="text-dash-text-dim text-sm mt-0.5">
             {projects.length} archived project{projects.length !== 1 ? "s" : ""}
           </p>
         </div>
@@ -90,20 +90,20 @@ export default async function ProjectArchivePage({
           name="q"
           defaultValue={searchQuery}
           placeholder="Search by name or client…"
-          className="flex-1 max-w-sm text-sm bg-gray-900 border border-gray-700 rounded-md px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-gray-500"
+          className="flex-1 max-w-sm text-sm bg-dash-surface border border-dash-border rounded-md px-3 py-2 text-dash-text placeholder-dash-text-dim focus:outline-none focus:border-dash-border"
         />
         {sort && <input type="hidden" name="sort" value={sort} />}
         {order && <input type="hidden" name="order" value={order} />}
         <button
           type="submit"
-          className="text-sm bg-gray-800 hover:bg-gray-700 text-gray-300 px-4 py-2 rounded-md transition-colors"
+          className="text-sm bg-dash-surface-2 hover:bg-dash-inset text-dash-text-muted px-4 py-2 rounded-md transition-colors"
         >
           Search
         </button>
         {searchQuery && (
           <Link
             href={sort ? `?sort=${sort}&order=${order}` : "?"}
-            className="text-sm text-gray-500 hover:text-gray-300 px-3 py-2 transition-colors"
+            className="text-sm text-dash-text-dim hover:text-dash-text px-3 py-2 transition-colors"
           >
             Clear
           </Link>
@@ -111,56 +111,56 @@ export default async function ProjectArchivePage({
       </form>
 
       {projects.length === 0 ? (
-        <p className="text-gray-600 text-sm">
+        <p className="text-dash-text-dim text-sm">
           {searchQuery ? "No archived projects match your search." : "No archived projects yet."}
         </p>
       ) : (
-        <div className="rounded-lg border border-gray-800 overflow-hidden">
+        <div className="rounded-lg border border-dash-border overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-gray-900">
+            <thead className="bg-dash-surface">
               <tr>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium">
-                  <Link href={sortLink("name")} className="flex items-center hover:text-white transition-colors">
+                <th className="text-left px-4 py-3 text-dash-text-muted font-medium">
+                  <Link href={sortLink("name")} className="flex items-center hover:text-dash-text transition-colors">
                     Project <SortArrow field="name" />
                   </Link>
                 </th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium hidden md:table-cell">
+                <th className="text-left px-4 py-3 text-dash-text-muted font-medium hidden md:table-cell">
                   Client
                 </th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium hidden lg:table-cell">
-                  <Link href={sortLink("closeDate")} className="flex items-center hover:text-white transition-colors">
+                <th className="text-left px-4 py-3 text-dash-text-muted font-medium hidden lg:table-cell">
+                  <Link href={sortLink("closeDate")} className="flex items-center hover:text-dash-text transition-colors">
                     Closed <SortArrow field="closeDate" />
                   </Link>
                 </th>
-                <th className="text-right px-4 py-3 text-gray-400 font-medium hidden xl:table-cell">
+                <th className="text-right px-4 py-3 text-dash-text-muted font-medium hidden xl:table-cell">
                   History
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-800">
+            <tbody className="divide-y divide-dash-border">
               {projects.map((p) => (
-                <tr key={p.id} className="bg-gray-950 hover:bg-gray-900 transition-colors">
+                <tr key={p.id} className="bg-dash-bg hover:bg-dash-surface transition-colors">
                   <td className="px-4 py-3">
                     <Link
                       href={`/projects/${p.id}`}
-                      className="text-gray-300 hover:text-white transition-colors"
+                      className="text-dash-text hover:text-dash-accent transition-colors"
                     >
                       {p.name}
                     </Link>
                     {p.clientName && (
-                      <p className="text-gray-600 text-xs mt-0.5 md:hidden">
+                      <p className="text-dash-text-dim text-xs mt-0.5 md:hidden">
                         {p.clientName}
                       </p>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-gray-500 hidden md:table-cell">
-                    {p.clientName ?? <span className="text-gray-700">—</span>}
+                  <td className="px-4 py-3 text-dash-text-muted hidden md:table-cell">
+                    {p.clientName ?? <span className="text-dash-text-dim">—</span>}
                   </td>
-                  <td className="px-4 py-3 text-gray-500 hidden lg:table-cell">
+                  <td className="px-4 py-3 text-dash-text-muted hidden lg:table-cell">
                     {formatDate(p.dueDate)}
                   </td>
                   <td className="px-4 py-3 text-right hidden xl:table-cell">
-                    <span className="text-xs text-gray-600 tabular-nums">
+                    <span className="text-xs text-dash-text-dim tabular-nums">
                       {p._count.weeklyStatusUpdates} update
                       {p._count.weeklyStatusUpdates !== 1 ? "s" : ""}
                       {p._count.actionItems > 0 && (

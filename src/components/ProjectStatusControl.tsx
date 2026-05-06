@@ -69,7 +69,7 @@ export default function ProjectStatusControl({ projectId, status, hasOverride, b
     return (
       <div className="flex flex-col gap-2 items-end">
         <textarea
-          className="w-56 text-xs bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-white placeholder-gray-500 resize-none focus:outline-none focus:border-red-600"
+          className="w-56 text-xs bg-dash-surface-2 border border-dash-border rounded-md px-3 py-2 text-dash-text placeholder-dash-text-dim resize-none focus:outline-none focus:border-red-600"
           rows={2}
           placeholder="Reason for blocked status…"
           value={reason}
@@ -79,7 +79,7 @@ export default function ProjectStatusControl({ projectId, status, hasOverride, b
         <div className="flex gap-2">
           <button
             onClick={() => { setShowReasonForm(false); setReason(""); }}
-            className="text-xs text-gray-400 hover:text-white px-2 py-1"
+            className="text-xs text-dash-text-muted hover:text-dash-text px-2 py-1"
           >
             Cancel
           </button>
@@ -113,30 +113,30 @@ export default function ProjectStatusControl({ projectId, status, hasOverride, b
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full mt-1 w-40 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-10 py-1">
+        <div className="absolute right-0 top-full mt-1 w-40 bg-dash-surface-2 border border-dash-border rounded-lg shadow-xl z-10 py-1">
           {(["on_track", "at_risk"] as ProjectStatus[]).map((s) => (
             <button
               key={s}
               onClick={() => { setIsOpen(false); setStatus(s); }}
-              className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-700 transition-colors ${status === s && hasOverride ? "text-white font-medium" : "text-gray-300"}`}
+              className={`w-full text-left px-3 py-2 text-xs hover:bg-dash-inset transition-colors ${status === s && hasOverride ? "text-dash-text font-medium" : "text-dash-text-muted"}`}
             >
               {BADGE_LABELS[s]}
-              {status === s && hasOverride && <span className="ml-1 text-gray-500">✓</span>}
+              {status === s && hasOverride && <span className="ml-1 text-dash-text-dim">✓</span>}
             </button>
           ))}
           <button
             onClick={() => { setIsOpen(false); setShowReasonForm(true); }}
-            className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-700 transition-colors ${status === "blocked" ? "text-white font-medium" : "text-gray-300"}`}
+            className={`w-full text-left px-3 py-2 text-xs hover:bg-dash-inset transition-colors ${status === "blocked" ? "text-dash-text font-medium" : "text-dash-text-muted"}`}
           >
             Blocked
-            {status === "blocked" && <span className="ml-1 text-gray-500">✓</span>}
+            {status === "blocked" && <span className="ml-1 text-dash-text-dim">✓</span>}
           </button>
           {hasOverride && (
             <>
-              <div className="my-1 border-t border-gray-700" />
+              <div className="my-1 border-t border-dash-border" />
               <button
                 onClick={() => { setIsOpen(false); clearOverride(); }}
-                className="w-full text-left px-3 py-2 text-xs text-gray-500 hover:bg-gray-700 hover:text-gray-300 transition-colors"
+                className="w-full text-left px-3 py-2 text-xs text-dash-text-dim hover:bg-dash-inset hover:text-dash-text-muted transition-colors"
               >
                 Reset to auto
               </button>

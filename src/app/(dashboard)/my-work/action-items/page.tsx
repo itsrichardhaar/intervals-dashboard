@@ -41,8 +41,8 @@ export default async function MyActionItemsPage() {
     <div className="max-w-3xl mx-auto px-6 py-8 space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-xl font-semibold text-white mb-1">My Action Items</h1>
-        <p className="text-gray-500 text-sm">
+        <h1 className="text-xl font-semibold text-dash-text mb-1">My Action Items</h1>
+        <p className="text-dash-text-dim text-sm">
           {openItems.length} open
           {overdueItems.length > 0 && (
             <span className="ml-2 text-red-400">{overdueItems.length} overdue</span>
@@ -55,7 +55,7 @@ export default async function MyActionItemsPage() {
 
       {/* Open items */}
       {openItems.length === 0 ? (
-        <p className="text-gray-600 text-sm">No open action items — you&apos;re all caught up.</p>
+        <p className="text-dash-text-dim text-sm">No open action items — you&apos;re all caught up.</p>
       ) : (
         <section className="space-y-2">
           {openItems.map((item) => {
@@ -65,12 +65,12 @@ export default async function MyActionItemsPage() {
               <div
                 key={item.id}
                 className={`flex items-start gap-3 border rounded-lg px-4 py-3 ${
-                  overdue ? "bg-red-950/30 border-red-900/50" : "bg-gray-900 border-gray-800"
+                  overdue ? "bg-red-950/30 border-red-900/50" : "bg-dash-surface border-dash-border"
                 }`}
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2 mb-1">
-                    <p className={`text-sm font-medium ${overdue ? "text-red-200" : "text-white"}`}>
+                    <p className={`text-sm font-medium ${overdue ? "text-red-200" : "text-dash-text"}`}>
                       {item.description}
                     </p>
                     {overdue && (
@@ -84,7 +84,7 @@ export default async function MyActionItemsPage() {
                       </span>
                     )}
                   </div>
-                  <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500">
+                  <div className="flex flex-wrap items-center gap-3 text-xs text-dash-text-dim">
                     {item.project && <span>{item.project.name}</span>}
                     {item.task && <span>on: {item.task.title}</span>}
                     {item.dueDate && (
@@ -104,20 +104,20 @@ export default async function MyActionItemsPage() {
       {/* Recently completed */}
       {recentlyCompleted.length > 0 && (
         <section>
-          <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-3">
+          <h2 className="text-sm font-medium text-dash-text-dim uppercase tracking-wide mb-3">
             Completed this week
           </h2>
           <div className="space-y-1.5">
             {recentlyCompleted.map((item) => (
               <div
                 key={item.id}
-                className="flex items-start gap-3 bg-gray-900/50 border border-gray-800/50 rounded-lg px-4 py-2.5"
+                className="flex items-start gap-3 bg-dash-surface/50 border border-dash-border/50 rounded-lg px-4 py-2.5"
               >
                 <span className="text-green-600 mt-0.5 text-sm">✓</span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-gray-500 line-through">{item.description}</p>
+                  <p className="text-sm text-dash-text-dim line-through">{item.description}</p>
                   {item.project && (
-                    <p className="text-xs text-gray-700 mt-0.5">{item.project.name}</p>
+                    <p className="text-xs text-dash-text-dim mt-0.5">{item.project.name}</p>
                   )}
                 </div>
               </div>

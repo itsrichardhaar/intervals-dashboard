@@ -31,7 +31,7 @@ export default function CompleteActionItemButton({ id }: Props) {
       <button
         onClick={handleComplete}
         disabled={isPending}
-        className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 disabled:opacity-50 text-gray-300 hover:text-white text-xs font-medium rounded-md transition-colors border border-gray-700"
+        className="px-3 py-1.5 bg-dash-surface-2 hover:bg-dash-inset disabled:opacity-50 text-dash-text-muted hover:text-dash-text text-xs font-medium rounded-md transition-colors border border-dash-border"
       >
         {isPending ? "Saving…" : "Complete"}
       </button>

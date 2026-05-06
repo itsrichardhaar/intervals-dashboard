@@ -36,7 +36,7 @@ function formatDateTime(date: Date): string {
 }
 
 const STATUS_BADGE: Record<string, string> = {
-  open: "bg-gray-700 text-gray-300",
+  open: "bg-dash-surface-2 text-dash-text-muted",
   in_progress: "bg-blue-900/60 text-blue-300",
   in_internal_review: "bg-purple-900/60 text-purple-300",
   in_client_review: "bg-indigo-900/60 text-indigo-300",
@@ -227,25 +227,25 @@ export default async function ProjectDetailPage({
       {/* Breadcrumb */}
       <Link
         href={isArchived ? "/projects/archive" : "/projects"}
-        className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+        className="text-xs text-dash-text-dim hover:text-dash-text transition-colors"
       >
         ← {isArchived ? "Archive" : "Projects"}
       </Link>
 
       {/* Archived notice */}
       {isArchived && (
-        <div className="flex items-center gap-2 bg-gray-800 border border-gray-700 rounded-lg px-4 py-3">
-          <span className="text-gray-400 text-xs font-medium uppercase tracking-wide">Archived</span>
-          <span className="text-gray-600 text-xs">This project is no longer active. History is read-only.</span>
+        <div className="flex items-center gap-2 bg-dash-surface-2 border border-dash-border rounded-lg px-4 py-3">
+          <span className="text-dash-text-muted text-xs font-medium uppercase tracking-wide">Archived</span>
+          <span className="text-dash-text-dim text-xs">This project is no longer active. History is read-only.</span>
         </div>
       )}
 
       {/* Project header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-white">{project.name}</h1>
+          <h1 className="text-2xl font-semibold text-dash-text">{project.name}</h1>
           {project.clientName && (
-            <p className="text-gray-400 mt-1">{project.clientName}</p>
+            <p className="text-dash-text-muted mt-1">{project.clientName}</p>
           )}
         </div>
         <ProjectStatusControl
@@ -258,21 +258,21 @@ export default async function ProjectDetailPage({
 
       {/* Budget summary */}
       {totalEstimated > 0 && (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl px-5 py-4 space-y-2">
+        <div className="bg-dash-surface border border-dash-border rounded-xl px-5 py-4 space-y-2">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-400">Budget hours</span>
+            <span className="text-dash-text-muted">Budget hours</span>
             <span
               className={`tabular-nums font-medium ${
-                budgetPct !== null && budgetPct > 100 ? "text-red-400" : "text-white"
+                budgetPct !== null && budgetPct > 100 ? "text-red-400" : "text-dash-text"
               }`}
             >
               {totalLogged.toFixed(1)}h logged / {totalEstimated.toFixed(1)}h estimated
               {budgetPct !== null && (
-                <span className="text-gray-500 font-normal ml-2">({budgetPct}%)</span>
+                <span className="text-dash-text-dim font-normal ml-2">({budgetPct}%)</span>
               )}
             </span>
           </div>
-          <div className="w-full bg-gray-800 rounded-full h-2 overflow-hidden">
+          <div className="w-full bg-dash-surface-2 rounded-full h-2 overflow-hidden">
             <div
               className={`h-2 rounded-full ${
                 budgetPct !== null && budgetPct > 100
@@ -294,23 +294,23 @@ export default async function ProjectDetailPage({
 
       {/* Tasks by assignee */}
       <section>
-        <h2 className="text-sm font-medium text-gray-400 uppercase tracking-wide mb-3">
+        <h2 className="text-sm font-medium text-dash-text-muted uppercase tracking-wide mb-3">
           Tasks
-          <span className="ml-2 text-gray-600 normal-case font-normal">
+          <span className="ml-2 text-dash-text-dim normal-case font-normal">
             {project.tasks.length} total
           </span>
         </h2>
 
         {project.tasks.length === 0 ? (
-          <p className="text-gray-600 text-sm">No tasks on this project yet.</p>
+          <p className="text-dash-text-dim text-sm">No tasks on this project yet.</p>
         ) : (
           <div className="space-y-4">
             {assigneeGroups.map((group) => (
-              <div key={group.name} className="rounded-lg border border-gray-800 overflow-hidden">
-                <div className="bg-gray-900 px-4 py-2.5 border-b border-gray-800 flex items-center justify-between gap-4">
+              <div key={group.name} className="rounded-lg border border-dash-border overflow-hidden">
+                <div className="bg-dash-surface px-4 py-2.5 border-b border-dash-border flex items-center justify-between gap-4">
                   <div>
-                    <span className="text-sm font-medium text-gray-300">{group.name}</span>
-                    <span className="ml-2 text-xs text-gray-600">
+                    <span className="text-sm font-medium text-dash-text">{group.name}</span>
+                    <span className="ml-2 text-xs text-dash-text-dim">
                       {group.tasks.length} task{group.tasks.length !== 1 ? "s" : ""}
                     </span>
                   </div>
@@ -318,7 +318,7 @@ export default async function ProjectDetailPage({
                     const bw = bandwidthByAssignee.get(group.personId);
                     if (bw === undefined) return null;
                     if (bw === null) return (
-                      <span className="text-xs text-gray-600">Not linked</span>
+                      <span className="text-xs text-dash-text-dim">Not linked</span>
                     );
                     const color = bandwidthTextColor(bw);
                     return (
@@ -329,7 +329,7 @@ export default async function ProjectDetailPage({
                   })()}
                 </div>
                 <table className="w-full text-sm">
-                  <tbody className="divide-y divide-gray-800">
+                  <tbody className="divide-y divide-dash-border">
                     {group.tasks.map((task) => {
                       const norm = normalizeTaskStatus(task.status);
                       const flagged = !task.estimatedHours;
@@ -337,13 +337,13 @@ export default async function ProjectDetailPage({
                       return (
                         <tr
                           key={task.id}
-                          className={`${flagged ? "bg-yellow-950/20" : "bg-gray-950"} hover:bg-gray-900 transition-colors`}
+                          className={`${flagged ? "bg-yellow-950/20" : "bg-dash-bg"} hover:bg-dash-surface transition-colors`}
                         >
                           <td className="px-4 py-2.5 max-w-0 w-full">
                             <div className="flex items-center gap-2">
                               <span
                                 className={`font-medium truncate ${
-                                  overdue ? "text-red-300" : "text-white"
+                                  overdue ? "text-red-300" : "text-dash-text"
                                 }`}
                               >
                                 {task.title}
@@ -357,19 +357,19 @@ export default async function ProjectDetailPage({
                           </td>
                           <td className="px-4 py-2.5 whitespace-nowrap hidden sm:table-cell">
                             <span
-                              className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${STATUS_BADGE[norm] ?? "bg-gray-700 text-gray-300"}`}
+                              className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${STATUS_BADGE[norm] ?? "bg-dash-surface-2 text-dash-text-muted"}`}
                             >
                               {STATUS_LABEL[norm] ?? task.status}
                             </span>
                           </td>
                           <td
                             className={`px-4 py-2.5 text-xs whitespace-nowrap hidden md:table-cell ${
-                              overdue ? "text-red-400" : "text-gray-500"
+                              overdue ? "text-red-400" : "text-dash-text-dim"
                             }`}
                           >
                             {formatDate(task.dueDate)}
                           </td>
-                          <td className="px-4 py-2.5 text-xs text-gray-500 text-right whitespace-nowrap hidden lg:table-cell tabular-nums">
+                          <td className="px-4 py-2.5 text-xs text-dash-text-dim text-right whitespace-nowrap hidden lg:table-cell tabular-nums">
                             {task.estimatedHours != null
                               ? `${task.estimatedHours}h`
                               : "—"}{" "}
@@ -389,14 +389,14 @@ export default async function ProjectDetailPage({
       {/* Action items */}
       <section>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-medium text-gray-400 uppercase tracking-wide">
+          <h2 className="text-sm font-medium text-dash-text-muted uppercase tracking-wide">
             Action Items
           </h2>
           {!isArchived && <AddActionItemForm projectId={project.id} users={users} />}
         </div>
 
         {actionItems.length === 0 ? (
-          <p className="text-gray-600 text-sm">No open action items.</p>
+          <p className="text-dash-text-dim text-sm">No open action items.</p>
         ) : (
           <div className="space-y-2">
             {actionItems.map((item) => {
@@ -405,11 +405,11 @@ export default async function ProjectDetailPage({
               return (
                 <div
                   key={item.id}
-                  className="flex items-start gap-3 bg-gray-900 border border-gray-800 rounded-lg px-4 py-3"
+                  className="flex items-start gap-3 bg-dash-surface border border-dash-border rounded-lg px-4 py-3"
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 mb-1">
-                      <p className="text-white text-sm">{item.description}</p>
+                      <p className="text-dash-text text-sm">{item.description}</p>
                       {carriedOver && (
                         <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-yellow-900/50 text-yellow-300">
                           Carried over
@@ -421,7 +421,7 @@ export default async function ProjectDetailPage({
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center gap-3 text-xs text-gray-500">
+                    <div className="flex items-center gap-3 text-xs text-dash-text-dim">
                       <span>{item.assignee.name ?? item.assignee.email}</span>
                       {item.dueDate && (
                         <span className={overdue ? "text-red-400" : ""}>
@@ -441,35 +441,35 @@ export default async function ProjectDetailPage({
       {/* Weekly status updates */}
       <section>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-medium text-gray-400 uppercase tracking-wide">
+          <h2 className="text-sm font-medium text-dash-text-muted uppercase tracking-wide">
             Status Updates
           </h2>
           {!isArchived && <AddWeeklyStatusUpdateForm projectId={project.id} />}
         </div>
 
         {statusUpdates.length === 0 ? (
-          <p className="text-gray-600 text-sm">No updates yet.</p>
+          <p className="text-dash-text-dim text-sm">No updates yet.</p>
         ) : (
           <div className="space-y-3">
             {statusUpdates.map((update) => (
               <div
                 key={update.id}
-                className="bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 space-y-2"
+                className="bg-dash-surface border border-dash-border rounded-lg px-4 py-3 space-y-2"
               >
                 <div className="flex items-center gap-3">
                   <span
                     className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium ${
-                      UPDATE_STATUS_STYLES[update.status] ?? "bg-gray-700 text-gray-300"
+                      UPDATE_STATUS_STYLES[update.status] ?? "bg-dash-surface-2 text-dash-text-muted"
                     }`}
                   >
                     {UPDATE_STATUS_LABELS[update.status] ?? update.status}
                   </span>
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-dash-text-dim">
                     {update.author.name ?? update.author.email} ·{" "}
                     {formatDateTime(update.createdAt)}
                   </span>
                 </div>
-                <p className="text-sm text-gray-300 leading-relaxed">
+                <p className="text-sm text-dash-text leading-relaxed">
                   {update.summary}
                 </p>
               </div>
@@ -480,13 +480,13 @@ export default async function ProjectDetailPage({
 
       {/* Milestones */}
       <section>
-        <h2 className="text-sm font-medium text-gray-400 uppercase tracking-wide mb-3">
+        <h2 className="text-sm font-medium text-dash-text-muted uppercase tracking-wide mb-3">
           Milestones
         </h2>
         {milestones.length === 0 ? (
-          <p className="text-gray-600 text-sm">No milestones for this project.</p>
+          <p className="text-dash-text-dim text-sm">No milestones for this project.</p>
         ) : (
-          <div className="rounded-lg border border-gray-800 overflow-hidden divide-y divide-gray-800">
+          <div className="rounded-lg border border-dash-border overflow-hidden divide-y divide-dash-border">
             {milestones.map((m) => {
               const overdueMilestone =
                 !m.completed && m.dueDate !== null && m.dueDate < new Date();
@@ -494,12 +494,12 @@ export default async function ProjectDetailPage({
                 <div
                   key={m.id}
                   className={`flex items-center gap-4 px-4 py-3 ${
-                    m.completed ? "bg-gray-900/40" : "bg-gray-950"
+                    m.completed ? "bg-dash-surface/40" : "bg-dash-bg"
                   }`}
                 >
                   <span
                     className={`text-sm ${
-                      m.completed ? "text-gray-500 line-through" : overdueMilestone ? "text-red-300" : "text-white"
+                      m.completed ? "text-dash-text-dim line-through" : overdueMilestone ? "text-red-300" : "text-dash-text"
                     }`}
                   >
                     {m.title}
@@ -508,10 +508,10 @@ export default async function ProjectDetailPage({
                     <span
                       className={`ml-auto text-xs whitespace-nowrap ${
                         m.completed
-                          ? "text-gray-600"
+                          ? "text-dash-text-dim"
                           : overdueMilestone
                             ? "text-red-400"
-                            : "text-gray-500"
+                            : "text-dash-text-dim"
                       }`}
                     >
                       {overdueMilestone && "⚠ "}
@@ -532,26 +532,26 @@ export default async function ProjectDetailPage({
 
       {/* Documents */}
       <section>
-        <h2 className="text-sm font-medium text-gray-400 uppercase tracking-wide mb-3">
+        <h2 className="text-sm font-medium text-dash-text-muted uppercase tracking-wide mb-3">
           Documents
         </h2>
         {documents.length === 0 ? (
-          <p className="text-gray-600 text-sm">No documents for this project.</p>
+          <p className="text-dash-text-dim text-sm">No documents for this project.</p>
         ) : (
-          <div className="rounded-lg border border-gray-800 overflow-hidden divide-y divide-gray-800">
+          <div className="rounded-lg border border-dash-border overflow-hidden divide-y divide-dash-border">
             {documents.map((doc) => (
-              <div key={doc.id} className="flex items-center px-4 py-3 bg-gray-950">
+              <div key={doc.id} className="flex items-center px-4 py-3 bg-dash-bg">
                 {doc.url ? (
                   <a
                     href={doc.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
+                    className="text-sm text-dash-accent hover:opacity-80 transition-opacity"
                   >
                     {doc.title}
                   </a>
                 ) : (
-                  <span className="text-sm text-gray-300">{doc.title}</span>
+                  <span className="text-sm text-dash-text">{doc.title}</span>
                 )}
               </div>
             ))}

@@ -9,7 +9,7 @@ type ProjectStatus = "on_track" | "at_risk" | "blocked";
 
 function BudgetBar({ logged, estimated }: { logged: number; estimated: number }) {
   if (estimated === 0) {
-    return <span className="text-gray-600 text-xs">No estimates</span>;
+    return <span className="text-dash-text-dim text-xs">No estimates</span>;
   }
   const rawPct = Math.round((logged / estimated) * 100);
   const overBudget = rawPct > 100;
@@ -21,7 +21,7 @@ function BudgetBar({ logged, estimated }: { logged: number; estimated: number })
       : rawPct >= 80
         ? "bg-yellow-400"
         : "bg-green-500";
-  const textColor = overBudget ? "text-red-400" : "text-gray-400";
+  const textColor = overBudget ? "text-red-400" : "text-dash-text-muted";
 
   return (
     <div className="space-y-1 min-w-[8rem]">
@@ -31,7 +31,7 @@ function BudgetBar({ logged, estimated }: { logged: number; estimated: number })
         </span>
         <span className={overBudget ? "font-medium" : ""}>{rawPct}%</span>
       </div>
-      <div className="w-full bg-gray-800 rounded-full h-1.5 overflow-hidden">
+      <div className="w-full bg-dash-surface-2 rounded-full h-1.5 overflow-hidden">
         <div className={`h-1.5 rounded-full ${barColor}`} style={{ width: `${barPct}%` }} />
       </div>
       {overBudget && (
@@ -92,7 +92,7 @@ function TeamChips({ members }: { members: string[] }) {
         </span>
       ))}
       {overflow > 0 && (
-        <span className="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium bg-gray-700 text-gray-300">
+        <span className="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium bg-dash-inset text-dash-text-muted">
           +{overflow}
         </span>
       )}
@@ -172,53 +172,53 @@ export default async function ProjectsPage() {
   return (
     <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
       <div>
-        <h1 className="text-xl font-semibold text-white mb-1">Projects</h1>
-        <p className="text-gray-500 text-sm">{enriched.length} active projects</p>
+        <h1 className="text-xl font-semibold text-dash-text mb-1">Projects</h1>
+        <p className="text-dash-text-dim text-sm">{enriched.length} active projects</p>
       </div>
 
-      <div className="rounded-lg border border-gray-800 overflow-hidden">
+      <div className="rounded-lg border border-dash-border overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-gray-900">
+          <thead className="bg-dash-surface">
             <tr>
-              <th className="text-left px-4 py-3 text-gray-400 font-medium w-[28%]">
+              <th className="text-left px-4 py-3 text-dash-text-muted font-medium w-[28%]">
                 Project
               </th>
-              <th className="text-left px-4 py-3 text-gray-400 font-medium hidden md:table-cell w-[15%]">
+              <th className="text-left px-4 py-3 text-dash-text-muted font-medium hidden md:table-cell w-[15%]">
                 Client
               </th>
-              <th className="text-left px-4 py-3 text-gray-400 font-medium w-[12%]">
+              <th className="text-left px-4 py-3 text-dash-text-muted font-medium w-[12%]">
                 Status
               </th>
-              <th className="text-left px-4 py-3 text-gray-400 font-medium hidden lg:table-cell w-[18%]">
+              <th className="text-left px-4 py-3 text-dash-text-muted font-medium hidden lg:table-cell w-[18%]">
                 Budget
               </th>
-              <th className="text-left px-4 py-3 text-gray-400 font-medium hidden xl:table-cell">
+              <th className="text-left px-4 py-3 text-dash-text-muted font-medium hidden xl:table-cell">
                 Latest Update
               </th>
-              <th className="text-left px-4 py-3 text-gray-400 font-medium hidden 2xl:table-cell">
+              <th className="text-left px-4 py-3 text-dash-text-muted font-medium hidden 2xl:table-cell">
                 Next Milestone
               </th>
-              <th className="text-left px-4 py-3 text-gray-400 font-medium hidden lg:table-cell">
+              <th className="text-left px-4 py-3 text-dash-text-muted font-medium hidden lg:table-cell">
                 Team
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-800">
+          <tbody className="divide-y divide-dash-border">
             {enriched.map((p) => (
-              <tr key={p.id} className="bg-gray-950 hover:bg-gray-900 transition-colors">
+              <tr key={p.id} className="bg-dash-bg hover:bg-dash-surface transition-colors">
                 <td className="px-4 py-3">
                   <Link
                     href={`/projects/${p.id}`}
-                    className="text-white font-medium leading-snug hover:text-blue-300 transition-colors"
+                    className="text-dash-text font-medium leading-snug hover:text-dash-accent transition-colors"
                   >
                     {p.name}
                   </Link>
                   {p.clientName && (
-                    <p className="text-gray-500 text-xs mt-0.5 md:hidden">{p.clientName}</p>
+                    <p className="text-dash-text-dim text-xs mt-0.5 md:hidden">{p.clientName}</p>
                   )}
                 </td>
-                <td className="px-4 py-3 text-gray-400 hidden md:table-cell">
-                  {p.clientName ?? <span className="text-gray-700">—</span>}
+                <td className="px-4 py-3 text-dash-text-muted hidden md:table-cell">
+                  {p.clientName ?? <span className="text-dash-text-dim">—</span>}
                 </td>
                 <td className="px-4 py-3">
                   <ProjectStatusControl
@@ -234,15 +234,15 @@ export default async function ProjectsPage() {
                 <td className="px-4 py-3 hidden 2xl:table-cell">
                   {p.nextMilestone ? (
                     <div>
-                      <p className="text-gray-300 text-xs truncate max-w-[140px]">{p.nextMilestone.title}</p>
+                      <p className="text-dash-text text-xs truncate max-w-[140px]">{p.nextMilestone.title}</p>
                       {p.nextMilestone.dueDate && (
-                        <p className="text-gray-600 text-xs mt-0.5">
+                        <p className="text-dash-text-dim text-xs mt-0.5">
                           {p.nextMilestone.dueDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                         </p>
                       )}
                     </div>
                   ) : (
-                    <span className="text-gray-700 text-xs">—</span>
+                    <span className="text-dash-text-dim text-xs">—</span>
                   )}
                 </td>
                 <td className="px-4 py-3 hidden lg:table-cell">
@@ -251,10 +251,10 @@ export default async function ProjectsPage() {
                 <td className="px-4 py-3 hidden xl:table-cell">
                   {p.latestUpdate ? (
                     <Link href={`/projects/${p.id}`} className="block group">
-                      <p className="text-gray-300 text-xs line-clamp-2 group-hover:text-white transition-colors">
+                      <p className="text-dash-text text-xs line-clamp-2 group-hover:text-dash-accent transition-colors">
                         {p.latestUpdate.summary}
                       </p>
-                      <p className="text-gray-600 text-xs mt-0.5">
+                      <p className="text-dash-text-dim text-xs mt-0.5">
                         {p.latestUpdate.author.name ?? "Unknown"} ·{" "}
                         {timeAgo(p.latestUpdate.createdAt)}
                       </p>
@@ -262,7 +262,7 @@ export default async function ProjectsPage() {
                   ) : (
                     <Link
                       href={`/projects/${p.id}`}
-                      className="text-xs text-gray-700 hover:text-gray-500 transition-colors"
+                      className="text-xs text-dash-text-dim hover:text-dash-text-muted transition-colors"
                     >
                       No updates yet →
                     </Link>
@@ -272,7 +272,7 @@ export default async function ProjectsPage() {
             ))}
             {enriched.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-gray-600">
+                <td colSpan={7} className="px-4 py-8 text-center text-dash-text-dim">
                   No active projects found. Run a sync to populate data.
                 </td>
               </tr>

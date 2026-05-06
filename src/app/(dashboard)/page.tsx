@@ -31,7 +31,7 @@ function formatDate(date: Date | null): string {
 
 function StatusBadge({ status }: { status: TaskStatus }) {
   const styles: Record<TaskStatus, string> = {
-    open: "bg-gray-700 text-gray-300",
+    open: "bg-dash-surface-2 text-dash-text-muted",
     in_progress: "bg-blue-900/60 text-blue-300",
     in_internal_review: "bg-purple-900/60 text-purple-300",
     in_client_review: "bg-indigo-900/60 text-indigo-300",
@@ -70,12 +70,12 @@ function BandwidthBar({
       <div className="flex items-end justify-between">
         <p className={`text-4xl font-bold tabular-nums ${textColor}`}>
           {percent}%
-          <span className="text-sm font-normal text-gray-400 ml-2">
+          <span className="text-sm font-normal text-dash-text-muted ml-2">
             of your {windowLabel} is committed
           </span>
         </p>
       </div>
-      <div className="w-full bg-gray-800 rounded-full h-3 overflow-hidden">
+      <div className="w-full bg-dash-surface-2 rounded-full h-3 overflow-hidden">
         <div
           className={`h-3 rounded-full transition-all ${color}`}
           style={{ width: `${percent}%` }}
@@ -193,17 +193,16 @@ export default async function HomePage({
 
   const weekStart = startOfCurrentWeek();
   const now = new Date();
-  // actionItems now referenced below (renamed from step 6 → step 7, no code change needed)
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <div className="max-w-4xl mx-auto px-6 py-8 space-y-10">
       {/* Header */}
       <div>
-        <h1 className="text-xl font-semibold text-white mb-1">
+        <h1 className="text-xl font-semibold text-dash-text mb-1">
           Good morning{firstName ? `, ${firstName}` : ""}
         </h1>
-        <p className="text-gray-500 text-sm">Personal Home</p>
+        <p className="text-dash-text-dim text-sm">Personal Home</p>
       </div>
 
       {/* Intervals not linked notice */}
@@ -221,22 +220,22 @@ export default async function HomePage({
 
       {/* ── Bandwidth ── */}
       {mapping && (
-        <section className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
+        <section className="bg-dash-surface border border-dash-border rounded-xl p-6 space-y-4">
           <div className="flex items-center justify-between gap-4">
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Bandwidth</p>
+            <p className="text-xs font-medium text-dash-text-dim uppercase tracking-wide">Bandwidth</p>
             <Suspense>
               <TimeWindowToggle current={timeWindow} />
             </Suspense>
           </div>
           <BandwidthBar percent={bandwidth.bandwidthPercent} window={timeWindow} />
-          <p className="text-gray-400 text-sm">
+          <p className="text-dash-text-muted text-sm">
             You have{" "}
-            <span className="text-white font-medium">
+            <span className="text-dash-text font-medium">
               {bandwidth.availableBandwidthPercent}% available
             </span>{" "}
             {timeWindow === "weekly" ? "this week" : timeWindow === "monthly" ? "this month" : "this quarter"}
             {" "}
-            <span className="text-gray-600">
+            <span className="text-dash-text-dim">
               ({bandwidth.freeHours.toFixed(1)}h free of {bandwidth.capacityHours}h)
             </span>
           </p>
@@ -246,7 +245,7 @@ export default async function HomePage({
       {/* ── My Action Items ── */}
       {actionItems.length > 0 && (
         <section>
-          <h2 className="text-sm font-medium text-gray-400 uppercase tracking-wide mb-3">
+          <h2 className="text-sm font-medium text-dash-text-muted uppercase tracking-wide mb-3">
             My Action Items
           </h2>
           <div className="space-y-2">
@@ -258,11 +257,11 @@ export default async function HomePage({
               return (
                 <div
                   key={item.id}
-                  className="flex items-start gap-3 bg-gray-900 border border-gray-800 rounded-lg px-4 py-3"
+                  className="flex items-start gap-3 bg-dash-surface border border-dash-border rounded-lg px-4 py-3"
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 mb-1">
-                      <p className="text-white text-sm">{item.description}</p>
+                      <p className="text-dash-text text-sm">{item.description}</p>
                       {carriedOver && (
                         <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-900/50 text-yellow-300">
                           Carried over
@@ -274,7 +273,7 @@ export default async function HomePage({
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center gap-3 text-xs text-gray-500">
+                    <div className="flex items-center gap-3 text-xs text-dash-text-dim">
                       {item.project && (
                         <span>{item.project.name}</span>
                       )}
@@ -294,56 +293,56 @@ export default async function HomePage({
       {/* ── Tasks This Week ── */}
       {mapping && (
         <section>
-          <h2 className="text-sm font-medium text-gray-400 uppercase tracking-wide mb-3">
+          <h2 className="text-sm font-medium text-dash-text-muted uppercase tracking-wide mb-3">
             Tasks This Week
           </h2>
           {tasksThisWeek.length === 0 ? (
-            <p className="text-gray-600 text-sm">
+            <p className="text-dash-text-dim text-sm">
               No tasks due this week.
             </p>
           ) : (
-            <div className="rounded-lg border border-gray-800 overflow-hidden">
+            <div className="rounded-lg border border-dash-border overflow-hidden">
               <table className="w-full text-sm">
-                <thead className="bg-gray-900">
+                <thead className="bg-dash-surface">
                   <tr>
-                    <th className="text-left px-4 py-3 text-gray-400 font-medium">
+                    <th className="text-left px-4 py-3 text-dash-text-muted font-medium">
                       Task
                     </th>
-                    <th className="text-left px-4 py-3 text-gray-400 font-medium hidden sm:table-cell">
+                    <th className="text-left px-4 py-3 text-dash-text-muted font-medium hidden sm:table-cell">
                       Project
                     </th>
-                    <th className="text-left px-4 py-3 text-gray-400 font-medium">
+                    <th className="text-left px-4 py-3 text-dash-text-muted font-medium">
                       Due
                     </th>
-                    <th className="text-right px-4 py-3 text-gray-400 font-medium hidden md:table-cell">
+                    <th className="text-right px-4 py-3 text-dash-text-muted font-medium hidden md:table-cell">
                       Est / Logged
                     </th>
-                    <th className="text-left px-4 py-3 text-gray-400 font-medium hidden lg:table-cell">
+                    <th className="text-left px-4 py-3 text-dash-text-muted font-medium hidden lg:table-cell">
                       Status
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-800">
+                <tbody className="divide-y divide-dash-border">
                   {tasksThisWeek.map((task) => {
                     const overdue = isOverdue(task.dueDate);
                     return (
                       <tr
                         key={task.id}
-                        className={`${overdue ? "bg-red-950/30" : "bg-gray-950"} hover:bg-gray-900`}
+                        className={`${overdue ? "bg-red-950/30" : "bg-dash-bg"} hover:bg-dash-surface`}
                       >
                         <td className="px-4 py-3">
                           <span
-                            className={`font-medium ${overdue ? "text-red-300" : "text-white"}`}
+                            className={`font-medium ${overdue ? "text-red-300" : "text-dash-text"}`}
                           >
                             {task.title}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-gray-400 hidden sm:table-cell">
+                        <td className="px-4 py-3 text-dash-text-muted hidden sm:table-cell">
                           {task.projectName}
                         </td>
                         <td className="px-4 py-3">
                           <span
-                            className={`font-medium ${overdue ? "text-red-400" : "text-gray-300"}`}
+                            className={`font-medium ${overdue ? "text-red-400" : "text-dash-text"}`}
                           >
                             {formatDate(task.dueDate)}
                           </span>
@@ -353,7 +352,7 @@ export default async function HomePage({
                             </span>
                           )}
                         </td>
-                        <td className="px-4 py-3 text-right text-gray-400 hidden md:table-cell tabular-nums">
+                        <td className="px-4 py-3 text-right text-dash-text-muted hidden md:table-cell tabular-nums">
                           {task.estimatedHours !== null
                             ? `${task.estimatedHours}h`
                             : "—"}{" "}
@@ -378,20 +377,20 @@ export default async function HomePage({
       {/* ── My Active Projects ── */}
       {mapping && activeProjects.length > 0 && (
         <section>
-          <h2 className="text-sm font-medium text-gray-400 uppercase tracking-wide mb-3">
+          <h2 className="text-sm font-medium text-dash-text-muted uppercase tracking-wide mb-3">
             My Active Projects
           </h2>
-          <div className="rounded-lg border border-gray-800 overflow-hidden">
+          <div className="rounded-lg border border-dash-border overflow-hidden">
             <table className="w-full text-sm">
-              <thead className="bg-gray-900">
+              <thead className="bg-dash-surface">
                 <tr>
-                  <th className="text-left px-4 py-3 text-gray-400 font-medium">Project</th>
-                  <th className="text-left px-4 py-3 text-gray-400 font-medium hidden sm:table-cell">Client</th>
-                  <th className="text-left px-4 py-3 text-gray-400 font-medium">Status</th>
-                  <th className="text-right px-4 py-3 text-gray-400 font-medium">Open Tasks</th>
+                  <th className="text-left px-4 py-3 text-dash-text-muted font-medium">Project</th>
+                  <th className="text-left px-4 py-3 text-dash-text-muted font-medium hidden sm:table-cell">Client</th>
+                  <th className="text-left px-4 py-3 text-dash-text-muted font-medium">Status</th>
+                  <th className="text-right px-4 py-3 text-dash-text-muted font-medium">Open Tasks</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-800">
+              <tbody className="divide-y divide-dash-border">
                 {activeProjects.map((p) => {
                   const healthStyles = {
                     on_track: "bg-green-900/50 text-green-300 border border-green-700/50",
@@ -404,21 +403,21 @@ export default async function HomePage({
                     blocked:  "Blocked",
                   };
                   return (
-                    <tr key={p.id} className="bg-gray-950 hover:bg-gray-900 transition-colors">
+                    <tr key={p.id} className="bg-dash-bg hover:bg-dash-surface transition-colors">
                       <td className="px-4 py-3">
-                        <Link href={`/projects/${p.id}`} className="text-white font-medium hover:text-blue-300 transition-colors">
+                        <Link href={`/projects/${p.id}`} className="text-dash-text font-medium hover:text-dash-accent transition-colors">
                           {p.name}
                         </Link>
                       </td>
-                      <td className="px-4 py-3 text-gray-400 hidden sm:table-cell">
-                        {p.clientName ?? <span className="text-gray-700">—</span>}
+                      <td className="px-4 py-3 text-dash-text-muted hidden sm:table-cell">
+                        {p.clientName ?? <span className="text-dash-text-dim">—</span>}
                       </td>
                       <td className="px-4 py-3">
                         <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${healthStyles[p.healthStatus]}`}>
                           {healthLabels[p.healthStatus]}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-right text-gray-400 tabular-nums">
+                      <td className="px-4 py-3 text-right text-dash-text-muted tabular-nums">
                         {p.openTaskCount}
                       </td>
                     </tr>
@@ -433,31 +432,31 @@ export default async function HomePage({
       {/* ── Flagged Tasks ── */}
       {mapping && bandwidth.flaggedTasks.length > 0 && (
         <section>
-          <h2 className="text-sm font-medium text-gray-400 uppercase tracking-wide mb-3">
+          <h2 className="text-sm font-medium text-dash-text-muted uppercase tracking-wide mb-3">
             Flagged Tasks — Estimates Missing
           </h2>
-          <div className="rounded-lg border border-gray-800 overflow-hidden">
+          <div className="rounded-lg border border-dash-border overflow-hidden">
             <table className="w-full text-sm">
-              <thead className="bg-gray-900">
+              <thead className="bg-dash-surface">
                 <tr>
-                  <th className="text-left px-4 py-3 text-gray-400 font-medium">
+                  <th className="text-left px-4 py-3 text-dash-text-muted font-medium">
                     Task
                   </th>
-                  <th className="text-left px-4 py-3 text-gray-400 font-medium hidden sm:table-cell">
+                  <th className="text-left px-4 py-3 text-dash-text-muted font-medium hidden sm:table-cell">
                     Project
                   </th>
-                  <th className="text-left px-4 py-3 text-gray-400 font-medium">
+                  <th className="text-left px-4 py-3 text-dash-text-muted font-medium">
                     Flag
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-800">
+              <tbody className="divide-y divide-dash-border">
                 {bandwidth.flaggedTasks.map((task) => (
-                  <tr key={task.id} className="bg-gray-950 hover:bg-gray-900">
-                    <td className="px-4 py-3 text-white font-medium">
+                  <tr key={task.id} className="bg-dash-bg hover:bg-dash-surface">
+                    <td className="px-4 py-3 text-dash-text font-medium">
                       {task.title}
                     </td>
-                    <td className="px-4 py-3 text-gray-400 hidden sm:table-cell">
+                    <td className="px-4 py-3 text-dash-text-muted hidden sm:table-cell">
                       {task.projectName}
                     </td>
                     <td className="px-4 py-3">

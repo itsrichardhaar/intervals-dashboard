@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.12] - 2026-05-05
+
+### Added
+- Mid/Dark/Light sidebar theme toggle — three-theme CSS variable system (`--dash-*` tokens) with `data-theme` attribute switching and `localStorage` persistence
+- Lucide React icons replace emoji in sidebar navigation (Home, Target, FolderOpen, Users, ListChecks, Settings)
+- Daily Focus nav item added to sidebar (links to `/daily-focus`)
+- Orange accent (`#f5a524`) on active nav items via `text-dash-accent`
+
+### Changed
+- Global refactor: all hardcoded gray Tailwind classes replaced with semantic `dash-*` tokens across every page and component
+- `globals.css` rewritten with `@theme inline` CSS variable registration for Tailwind v4 compatibility
+- Active nav items use `bg-dash-surface-2 text-dash-accent` pattern
+
+---
+
 ## [0.1.11] - 2026-05-05
 
 ### Changed

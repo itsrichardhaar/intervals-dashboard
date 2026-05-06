@@ -53,7 +53,7 @@ export default function AddActionItemForm({ projectId, users }: Props) {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="text-xs text-gray-500 hover:text-white border border-gray-700 hover:border-gray-500 px-3 py-1.5 rounded-md transition-colors"
+        className="text-xs text-dash-text-dim hover:text-dash-text border border-dash-border hover:border-dash-text-dim px-3 py-1.5 rounded-md transition-colors"
       >
         + Add action item
       </button>
@@ -61,13 +61,13 @@ export default function AddActionItemForm({ projectId, users }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-gray-900 border border-gray-700 rounded-lg p-4 space-y-3">
+    <form onSubmit={handleSubmit} className="bg-dash-surface border border-dash-border rounded-lg p-4 space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-sm font-medium text-white">New action item</p>
+        <p className="text-sm font-medium text-dash-text">New action item</p>
         <button
           type="button"
           onClick={() => { setIsOpen(false); setError(null); setDescription(""); setDueDate(""); }}
-          className="text-gray-500 hover:text-white text-xs"
+          className="text-dash-text-dim hover:text-dash-text text-xs"
         >
           Cancel
         </button>
@@ -78,17 +78,17 @@ export default function AddActionItemForm({ projectId, users }: Props) {
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         placeholder="Describe the action item…"
-        className="w-full text-sm bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-gray-500"
+        className="w-full text-sm bg-dash-surface-2 border border-dash-border rounded-md px-3 py-2 text-dash-text placeholder-dash-text-dim focus:outline-none focus:border-dash-text-dim"
         autoFocus
       />
 
       <div className="flex gap-3">
         <div className="flex-1">
-          <label className="block text-xs text-gray-500 mb-1">Assign to</label>
+          <label className="block text-xs text-dash-text-dim mb-1">Assign to</label>
           <select
             value={assigneeId}
             onChange={(e) => setAssigneeId(e.target.value)}
-            className="w-full text-sm bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-white focus:outline-none focus:border-gray-500"
+            className="w-full text-sm bg-dash-surface-2 border border-dash-border rounded-md px-3 py-2 text-dash-text focus:outline-none focus:border-dash-text-dim"
           >
             {users.map((u) => (
               <option key={u.id} value={u.id}>
@@ -98,12 +98,12 @@ export default function AddActionItemForm({ projectId, users }: Props) {
           </select>
         </div>
         <div className="flex-1">
-          <label className="block text-xs text-gray-500 mb-1">Due date (optional)</label>
+          <label className="block text-xs text-dash-text-dim mb-1">Due date (optional)</label>
           <input
             type="date"
             value={dueDate}
             onChange={(e) => setDueDate(e.target.value)}
-            className="w-full text-sm bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-white focus:outline-none focus:border-gray-500"
+            className="w-full text-sm bg-dash-surface-2 border border-dash-border rounded-md px-3 py-2 text-dash-text focus:outline-none focus:border-dash-text-dim"
           />
         </div>
       </div>
@@ -114,7 +114,7 @@ export default function AddActionItemForm({ projectId, users }: Props) {
         <button
           type="submit"
           disabled={!description.trim() || !assigneeId || isPending}
-          className="text-xs bg-gray-700 hover:bg-gray-600 disabled:opacity-40 text-white px-4 py-1.5 rounded-md transition-colors"
+          className="text-xs bg-dash-inset hover:bg-dash-surface-2 disabled:opacity-40 text-dash-text px-4 py-1.5 rounded-md transition-colors"
         >
           {isPending ? "Saving…" : "Add item"}
         </button>

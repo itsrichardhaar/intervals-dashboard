@@ -25,7 +25,7 @@ const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MAX_VISIBLE = 3;
 
 function itemStyle(item: CalendarItem): string {
-  if (item.closed) return "bg-gray-800 text-gray-500";
+  if (item.closed) return "bg-dash-surface-2 text-dash-text-dim";
   if (item.overdue) return "bg-red-900/50 text-red-300";
   if (item.dueToday) return "bg-yellow-900/50 text-yellow-300";
   return "bg-green-900/40 text-green-300";
@@ -59,13 +59,13 @@ export default function MonthlyCalendarGrid({ year, month, items }: Props) {
     today.getDate() === day;
 
   return (
-    <div className="rounded-lg border border-gray-800 overflow-hidden">
+    <div className="rounded-lg border border-dash-border overflow-hidden">
       {/* Day headers */}
-      <div className="grid grid-cols-7 bg-gray-900 border-b border-gray-800">
+      <div className="grid grid-cols-7 bg-dash-surface border-b border-dash-border">
         {DAY_LABELS.map((label) => (
           <div
             key={label}
-            className="text-center py-2 text-xs font-medium text-gray-500"
+            className="text-center py-2 text-xs font-medium text-dash-text-dim"
           >
             {label}
           </div>
@@ -85,8 +85,8 @@ export default function MonthlyCalendarGrid({ year, month, items }: Props) {
           return (
             <div
               key={i}
-              className={`border-b border-r border-gray-800 p-1.5 min-h-[80px] ${
-                !inMonth ? "bg-gray-900/30" : "bg-gray-950"
+              className={`border-b border-r border-dash-border p-1.5 min-h-[80px] ${
+                !inMonth ? "bg-dash-surface/30" : "bg-dash-bg"
               } ${isToday(day) ? "ring-1 ring-inset ring-blue-700" : ""}`}
             >
               {inMonth && (
@@ -95,7 +95,7 @@ export default function MonthlyCalendarGrid({ year, month, items }: Props) {
                     className={`text-xs mb-1 ${
                       isToday(day)
                         ? "text-blue-400 font-semibold"
-                        : "text-gray-600"
+                        : "text-dash-text-dim"
                     }`}
                   >
                     {day}
@@ -120,7 +120,7 @@ export default function MonthlyCalendarGrid({ year, month, items }: Props) {
                     {!isExpanded && overflow > 0 && (
                       <button
                         onClick={() => setExpandedDay(day)}
-                        className="text-xs text-gray-500 hover:text-gray-300 pl-1"
+                        className="text-xs text-dash-text-dim hover:text-dash-text-muted pl-1"
                       >
                         +{overflow} more
                       </button>
@@ -128,7 +128,7 @@ export default function MonthlyCalendarGrid({ year, month, items }: Props) {
                     {isExpanded && dayItems.length > MAX_VISIBLE && (
                       <button
                         onClick={() => setExpandedDay(null)}
-                        className="text-xs text-gray-500 hover:text-gray-300 pl-1"
+                        className="text-xs text-dash-text-dim hover:text-dash-text-muted pl-1"
                       >
                         Show less
                       </button>

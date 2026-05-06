@@ -66,7 +66,7 @@ function MappingCell({
             );
             setEditing(true);
           }}
-          className="text-xs text-gray-600 hover:text-gray-400 transition-colors ml-1"
+          className="text-xs text-dash-text-dim hover:text-dash-text-muted transition-colors ml-1"
         >
           Edit
         </button>
@@ -79,7 +79,7 @@ function MappingCell({
       <select
         value={selected}
         onChange={(e) => setSelected(e.target.value)}
-        className="text-xs bg-gray-800 border border-gray-600 rounded px-2 py-1 text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+        className="text-xs bg-dash-surface-2 border border-dash-border rounded px-2 py-1 text-dash-text focus:outline-none focus:ring-1 focus:ring-dash-accent"
       >
         <option value="">— No mapping —</option>
         {people.map((p) => (
@@ -98,7 +98,7 @@ function MappingCell({
       </button>
       <button
         onClick={() => { setEditing(false); setSelected(""); }}
-        className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+        className="text-xs text-dash-text-dim hover:text-dash-text transition-colors"
       >
         Cancel
       </button>
@@ -161,11 +161,11 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-8 space-y-10">
-      <h1 className="text-xl font-semibold text-white">Settings</h1>
+      <h1 className="text-xl font-semibold text-dash-text">Settings</h1>
 
       {/* Invite User */}
       <section>
-        <h2 className="text-sm font-medium text-gray-400 uppercase tracking-wide mb-4">
+        <h2 className="text-sm font-medium text-dash-text-muted uppercase tracking-wide mb-4">
           Invite Team Member
         </h2>
         <form onSubmit={handleInvite} className="space-y-3 max-w-sm">
@@ -175,7 +175,7 @@ export default function SettingsPage() {
             placeholder="Full name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 bg-dash-surface-2 border border-dash-border rounded-md text-dash-text placeholder-dash-text-dim text-sm focus:outline-none focus:ring-2 focus:ring-dash-accent"
           />
           <input
             required
@@ -183,17 +183,17 @@ export default function SettingsPage() {
             placeholder="Email address"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 bg-dash-surface-2 border border-dash-border rounded-md text-dash-text placeholder-dash-text-dim text-sm focus:outline-none focus:ring-2 focus:ring-dash-accent"
           />
           {error && <p className="text-red-400 text-sm">{error}</p>}
           {tempPassword && (
             <div className="bg-green-900/30 border border-green-700 rounded-md p-3">
               <p className="text-green-400 text-sm font-medium">Account created!</p>
-              <p className="text-gray-300 text-sm mt-1">
+              <p className="text-dash-text text-sm mt-1">
                 Temporary password:{" "}
-                <span className="font-mono font-semibold text-white">{tempPassword}</span>
+                <span className="font-mono font-semibold text-dash-text">{tempPassword}</span>
               </p>
-              <p className="text-gray-500 text-xs mt-1">Share this with the team member directly. It will only be shown once.</p>
+              <p className="text-dash-text-dim text-xs mt-1">Share this with the team member directly. It will only be shown once.</p>
             </div>
           )}
           <button
@@ -208,23 +208,23 @@ export default function SettingsPage() {
 
       {/* Team Members */}
       <section>
-        <h2 className="text-sm font-medium text-gray-400 uppercase tracking-wide mb-4">
+        <h2 className="text-sm font-medium text-dash-text-muted uppercase tracking-wide mb-4">
           Team Members
         </h2>
-        <div className="rounded-lg border border-gray-800 overflow-hidden">
+        <div className="rounded-lg border border-dash-border overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-gray-900">
+            <thead className="bg-dash-surface">
               <tr>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium">Name</th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium">Email</th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium">Intervals Link</th>
+                <th className="text-left px-4 py-3 text-dash-text-muted font-medium">Name</th>
+                <th className="text-left px-4 py-3 text-dash-text-muted font-medium">Email</th>
+                <th className="text-left px-4 py-3 text-dash-text-muted font-medium">Intervals Link</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-800">
+            <tbody className="divide-y divide-dash-border">
               {users.map((user) => (
-                <tr key={user.id} className="bg-gray-950 hover:bg-gray-900">
-                  <td className="px-4 py-3 text-white">{user.name ?? "—"}</td>
-                  <td className="px-4 py-3 text-gray-300">{user.email}</td>
+                <tr key={user.id} className="bg-dash-bg hover:bg-dash-surface">
+                  <td className="px-4 py-3 text-dash-text">{user.name ?? "—"}</td>
+                  <td className="px-4 py-3 text-dash-text">{user.email}</td>
                   <td className="px-4 py-3">
                     <MappingCell user={user} people={people} onSaved={handleMappingSaved} />
                   </td>
@@ -232,7 +232,7 @@ export default function SettingsPage() {
               ))}
               {users.length === 0 && (
                 <tr>
-                  <td colSpan={3} className="px-4 py-6 text-center text-gray-600 text-sm">
+                  <td colSpan={3} className="px-4 py-6 text-center text-dash-text-dim text-sm">
                     No team members yet.
                   </td>
                 </tr>
