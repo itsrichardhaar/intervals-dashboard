@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.17] - 2026-05-06
+
+### Added
+- Due-date bucket filter on All My Tasks: Overdue / This Week / This Month / No Due Date pills, toggle behavior, combinable with status checkboxes, persists in `sessionStorage`
+- `filterTasksByDate` pure function with 9 unit tests (201 total)
+- Staleness filter on Project Overview: "Stale" toggle shows projects with no weekly update posted this ISO week; combinable with Client + Status filters, reflected in URL (`?stale=1`)
+- `isStaleProject` and `currentISOWeekStart` pure functions with 9 unit tests
+
+---
+
 ## [0.1.16] - 2026-05-06
 
 ### Added

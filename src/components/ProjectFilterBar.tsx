@@ -8,6 +8,7 @@ interface Props {
   clients: string[];
   currentClient: string | null;
   currentStatuses: ProjectStatus[];
+  currentStale: boolean;
 }
 
 const STATUS_OPTIONS: { value: ProjectStatus; label: string; active: string; inactive: string }[] = [
@@ -31,27 +32,41 @@ const STATUS_OPTIONS: { value: ProjectStatus; label: string; active: string; ina
   },
 ];
 
-function buildUrl(client: string | null, statuses: ProjectStatus[]): string {
+function buildUrl(
+  client: string | null,
+  statuses: ProjectStatus[],
+  stale: boolean,
+): string {
   const params = new URLSearchParams();
   if (client) params.set("client", client);
   if (statuses.length > 0) params.set("status", statuses.join(","));
+  if (stale) params.set("stale", "1");
   const qs = params.toString();
   return qs ? `/projects?${qs}` : "/projects";
 }
 
-export default function ProjectFilterBar({ clients, currentClient, currentStatuses }: Props) {
+export default function ProjectFilterBar({
+  clients,
+  currentClient,
+  currentStatuses,
+  currentStale,
+}: Props) {
   const router = useRouter();
-  const hasAnyFilter = currentClient !== null || currentStatuses.length > 0;
+  const hasAnyFilter = currentClient !== null || currentStatuses.length > 0 || currentStale;
 
   function handleClientChange(client: string) {
-    router.replace(buildUrl(client || null, currentStatuses));
+    router.replace(buildUrl(client || null, currentStatuses, currentStale));
   }
 
   function toggleStatus(status: ProjectStatus) {
     const next = currentStatuses.includes(status)
       ? currentStatuses.filter((s) => s !== status)
       : [...currentStatuses, status];
-    router.replace(buildUrl(currentClient, next));
+    router.replace(buildUrl(currentClient, next, currentStale));
+  }
+
+  function toggleStale() {
+    router.replace(buildUrl(currentClient, currentStatuses, !currentStale));
   }
 
   function clearAll() {
@@ -90,6 +105,18 @@ export default function ProjectFilterBar({ clients, currentClient, currentStatus
           );
         })}
       </div>
+
+      {/* Stale toggle */}
+      <button
+        onClick={toggleStale}
+        className={`px-2.5 py-1 text-xs rounded-md border transition-colors ${
+          currentStale
+            ? "bg-orange-900/50 text-orange-300 border-orange-700"
+            : "text-dash-text-muted border-dash-border hover:border-dash-text-dim"
+        }`}
+      >
+        Stale
+      </button>
 
       {/* Clear button */}
       {hasAnyFilter && (

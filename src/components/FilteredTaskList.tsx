@@ -4,10 +4,12 @@ import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
   filterTasks,
+  filterTasksByDate,
   DEFAULT_TASK_FILTER,
   ALL_STATUSES,
   type TaskFilterSpec,
   type TaskStatus,
+  type DateBucket,
 } from "@/lib/taskFilters";
 
 const SESSION_KEY = "dash-task-filter";
@@ -40,17 +42,34 @@ const STATUS_BADGE: Record<string, string> = {
   closed:             "bg-green-900/60 text-green-300",
 };
 
-function loadFilterFromSession(): TaskFilterSpec {
+const DATE_BUCKETS: { value: DateBucket; label: string }[] = [
+  { value: "overdue",     label: "Overdue"       },
+  { value: "this_week",   label: "This Week"     },
+  { value: "this_month",  label: "This Month"    },
+  { value: "no_due_date", label: "No Due Date"   },
+];
+
+interface SavedFilter {
+  statuses: TaskStatus[];
+  dateBucket: DateBucket | null;
+}
+
+function loadFilterFromSession(): { spec: TaskFilterSpec; bucket: DateBucket | null } {
   try {
     const raw = sessionStorage.getItem(SESSION_KEY);
     if (raw) {
-      const parsed = JSON.parse(raw) as Partial<TaskFilterSpec>;
-      if (Array.isArray(parsed.statuses) && parsed.statuses.length > 0) {
-        return { statuses: parsed.statuses as TaskStatus[] };
-      }
+      const parsed = JSON.parse(raw) as Partial<SavedFilter>;
+      const spec: TaskFilterSpec = Array.isArray(parsed.statuses) && parsed.statuses.length > 0
+        ? { statuses: parsed.statuses as TaskStatus[] }
+        : { ...DEFAULT_TASK_FILTER };
+      const validBuckets: DateBucket[] = ["overdue", "this_week", "this_month", "no_due_date"];
+      const bucket = parsed.dateBucket && validBuckets.includes(parsed.dateBucket)
+        ? parsed.dateBucket
+        : null;
+      return { spec, bucket };
     }
   } catch {}
-  return { ...DEFAULT_TASK_FILTER };
+  return { spec: { ...DEFAULT_TASK_FILTER }, bucket: null };
 }
 
 function formatDate(iso: string | null): string {
@@ -64,11 +83,14 @@ function formatDate(iso: string | null): string {
 
 export default function FilteredTaskList({ tasks }: { tasks: SerializedTask[] }) {
   const [filter, setFilter] = useState<TaskFilterSpec>(DEFAULT_TASK_FILTER);
+  const [dateBucket, setDateBucket] = useState<DateBucket | null>(null);
   const [initialized, setInitialized] = useState(false);
 
   // Load from sessionStorage after mount (avoids SSR mismatch)
   useEffect(() => {
-    setFilter(loadFilterFromSession());
+    const { spec, bucket } = loadFilterFromSession();
+    setFilter(spec);
+    setDateBucket(bucket);
     setInitialized(true);
   }, []);
 
@@ -76,11 +98,16 @@ export default function FilteredTaskList({ tasks }: { tasks: SerializedTask[] })
   useEffect(() => {
     if (!initialized) return;
     try {
-      sessionStorage.setItem(SESSION_KEY, JSON.stringify(filter));
+      const saved: SavedFilter = { statuses: filter.statuses, dateBucket };
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify(saved));
     } catch {}
-  }, [filter, initialized]);
+  }, [filter, dateBucket, initialized]);
 
-  const filtered = useMemo(() => filterTasks(tasks, filter), [tasks, filter]);
+  const filtered = useMemo(() => {
+    const byStatus = filterTasks(tasks, filter);
+    return filterTasksByDate(byStatus, dateBucket);
+  }, [tasks, filter, dateBucket]);
+
   const overdueCount = filtered.filter((t) => t.overdue).length;
 
   function toggleStatus(status: TaskStatus) {
@@ -92,24 +119,29 @@ export default function FilteredTaskList({ tasks }: { tasks: SerializedTask[] })
     });
   }
 
+  function selectBucket(bucket: DateBucket) {
+    setDateBucket((prev) => (prev === bucket ? null : bucket));
+  }
+
   // Suppress rendering until sessionStorage state is loaded to avoid filter flash
   if (!initialized) return null;
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-xl font-semibold text-dash-text mb-1">All My Tasks</h1>
-          <p className="text-dash-text-dim text-sm">
-            {filtered.length} task{filtered.length !== 1 ? "s" : ""}
-            {overdueCount > 0 && (
-              <span className="ml-2 text-red-400">{overdueCount} overdue</span>
-            )}
-          </p>
-        </div>
+      <div>
+        <h1 className="text-xl font-semibold text-dash-text mb-1">All My Tasks</h1>
+        <p className="text-dash-text-dim text-sm">
+          {filtered.length} task{filtered.length !== 1 ? "s" : ""}
+          {overdueCount > 0 && (
+            <span className="ml-2 text-red-400">{overdueCount} overdue</span>
+          )}
+        </p>
+      </div>
 
-        {/* Status filter checkboxes */}
+      {/* Filters */}
+      <div className="flex flex-col gap-3">
+        {/* Status checkboxes */}
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
           {ALL_STATUSES.map((s) => {
             const checked = filter.statuses.includes(s);
@@ -128,9 +160,38 @@ export default function FilteredTaskList({ tasks }: { tasks: SerializedTask[] })
             );
           })}
         </div>
-      </div>
 
-      {/* No mapping warning is shown by parent (server component) */}
+        {/* Date bucket pills */}
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="text-xs text-dash-text-dim mr-1">Due:</span>
+          {DATE_BUCKETS.map((b) => {
+            const active = dateBucket === b.value;
+            return (
+              <button
+                key={b.value}
+                onClick={() => selectBucket(b.value)}
+                className={`px-2.5 py-1 text-xs rounded-md border transition-colors ${
+                  active
+                    ? b.value === "overdue"
+                      ? "bg-red-900/50 text-red-300 border-red-700"
+                      : "bg-dash-inset text-dash-accent border-dash-accent/50"
+                    : "text-dash-text-muted border-dash-border hover:border-dash-text-dim"
+                }`}
+              >
+                {b.label}
+              </button>
+            );
+          })}
+          {dateBucket && (
+            <button
+              onClick={() => setDateBucket(null)}
+              className="text-xs text-dash-text-dim hover:text-dash-text-muted transition-colors ml-1"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+      </div>
 
       {/* Results */}
       {filtered.length === 0 ? (
@@ -181,6 +242,11 @@ export default function FilteredTaskList({ tasks }: { tasks: SerializedTask[] })
                     {task.overdue && (
                       <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-red-900/60 text-red-300">
                         Overdue
+                      </span>
+                    )}
+                    {!task.dueDate && (
+                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-dash-surface-2 text-dash-text-dim border border-dash-border">
+                        No due date
                       </span>
                     )}
                   </td>

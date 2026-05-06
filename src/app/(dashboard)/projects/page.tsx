@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { calculateProjectStatus } from "@/lib/calculators/projectStatus";
+import { isStaleProject, currentISOWeekStart } from "@/lib/projectStaleness";
 import ProjectStatusControl from "@/components/ProjectStatusControl";
 import ProjectFilterBar from "@/components/ProjectFilterBar";
 
@@ -105,16 +106,17 @@ type ProjectStatus = typeof VALID_STATUSES[number];
 export default async function ProjectsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ client?: string; status?: string }>;
+  searchParams: Promise<{ client?: string; status?: string; stale?: string }>;
 }) {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 
-  const { client: clientParam, status: statusParam } = await searchParams;
+  const { client: clientParam, status: statusParam, stale: staleParam } = await searchParams;
   const currentClient = clientParam?.trim() || null;
   const currentStatuses = (statusParam?.split(",").filter(
     (s): s is ProjectStatus => VALID_STATUSES.includes(s as ProjectStatus)
   )) ?? [];
+  const currentStale = staleParam === "1";
 
   const projects = await prisma.intervalsProject.findMany({
     where: { status: "active" },
@@ -186,10 +188,13 @@ export default async function ProjectsPage({
     projects.map((p) => p.clientName).filter((c): c is string => c !== null && c !== "")
   )].sort();
 
+  const weekStart = currentISOWeekStart();
+
   // Apply active filters
   const filtered = enriched.filter((p) => {
     if (currentClient && p.clientName !== currentClient) return false;
     if (currentStatuses.length > 0 && !currentStatuses.includes(p.effectiveStatus)) return false;
+    if (currentStale && !isStaleProject(p.latestUpdate?.createdAt ?? null, weekStart)) return false;
     return true;
   });
 
@@ -206,6 +211,7 @@ export default async function ProjectsPage({
           clients={allClients}
           currentClient={currentClient}
           currentStatuses={currentStatuses}
+          currentStale={currentStale}
         />
       </div>
 
