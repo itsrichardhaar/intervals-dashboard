@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.19] - 2026-05-06
+
+### Changed
+- Upgraded Prisma from 5.22.0 to 7.8.0
+- Moved database connection config from `schema.prisma` to `prisma.config.ts` (Prisma 7 requirement)
+- Removed `directUrl` / `DIRECT_URL` — Prisma 7 uses a single direct connection URL; updated `.env.example` accordingly
+
+---
+
 ## [0.1.18] - 2026-05-06
 
 ### Added
