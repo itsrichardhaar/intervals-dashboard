@@ -9,6 +9,8 @@ interface Props {
   currentClient: string | null;
   currentStatuses: ProjectStatus[];
   currentStale: boolean;
+  currentSort: string | null;
+  currentDir: "asc" | "desc";
 }
 
 const STATUS_OPTIONS: { value: ProjectStatus; label: string; active: string; inactive: string }[] = [
@@ -36,11 +38,15 @@ function buildUrl(
   client: string | null,
   statuses: ProjectStatus[],
   stale: boolean,
+  sort: string | null,
+  dir: "asc" | "desc",
 ): string {
   const params = new URLSearchParams();
   if (client) params.set("client", client);
   if (statuses.length > 0) params.set("status", statuses.join(","));
   if (stale) params.set("stale", "1");
+  if (sort && sort !== "name") params.set("sort", sort);
+  if (sort && sort !== "name" && dir !== "asc") params.set("dir", dir);
   const qs = params.toString();
   return qs ? `/projects?${qs}` : "/projects";
 }
@@ -50,27 +56,34 @@ export default function ProjectFilterBar({
   currentClient,
   currentStatuses,
   currentStale,
+  currentSort,
+  currentDir,
 }: Props) {
   const router = useRouter();
   const hasAnyFilter = currentClient !== null || currentStatuses.length > 0 || currentStale;
 
   function handleClientChange(client: string) {
-    router.replace(buildUrl(client || null, currentStatuses, currentStale));
+    router.replace(buildUrl(client || null, currentStatuses, currentStale, currentSort, currentDir));
   }
 
   function toggleStatus(status: ProjectStatus) {
     const next = currentStatuses.includes(status)
       ? currentStatuses.filter((s) => s !== status)
       : [...currentStatuses, status];
-    router.replace(buildUrl(currentClient, next, currentStale));
+    router.replace(buildUrl(currentClient, next, currentStale, currentSort, currentDir));
   }
 
   function toggleStale() {
-    router.replace(buildUrl(currentClient, currentStatuses, !currentStale));
+    router.replace(buildUrl(currentClient, currentStatuses, !currentStale, currentSort, currentDir));
   }
 
   function clearAll() {
-    router.replace("/projects");
+    // Preserve sort when clearing filters
+    const params = new URLSearchParams();
+    if (currentSort && currentSort !== "name") params.set("sort", currentSort);
+    if (currentSort && currentSort !== "name" && currentDir !== "asc") params.set("dir", currentDir);
+    const qs = params.toString();
+    router.replace(qs ? `/projects?${qs}` : "/projects");
   }
 
   return (

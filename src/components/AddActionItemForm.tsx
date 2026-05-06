@@ -9,19 +9,33 @@ interface User {
   email: string;
 }
 
+interface Task {
+  id: string;
+  title: string;
+}
+
 interface Props {
   projectId: string;
   users: User[];
+  tasks?: Task[];
 }
 
-export default function AddActionItemForm({ projectId, users }: Props) {
+export default function AddActionItemForm({ projectId, users, tasks }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [isOpen, setIsOpen] = useState(false);
   const [description, setDescription] = useState("");
   const [assigneeId, setAssigneeId] = useState(users[0]?.id ?? "");
   const [dueDate, setDueDate] = useState("");
+  const [taskId, setTaskId] = useState("");
   const [error, setError] = useState<string | null>(null);
+
+  function reset() {
+    setDescription("");
+    setDueDate("");
+    setTaskId("");
+    setError(null);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -34,6 +48,7 @@ export default function AddActionItemForm({ projectId, users }: Props) {
         description,
         assigneeId,
         dueDate: dueDate || undefined,
+        taskId: taskId || undefined,
       }),
     });
 
@@ -43,8 +58,7 @@ export default function AddActionItemForm({ projectId, users }: Props) {
       return;
     }
 
-    setDescription("");
-    setDueDate("");
+    reset();
     setIsOpen(false);
     startTransition(() => router.refresh());
   }
@@ -66,7 +80,7 @@ export default function AddActionItemForm({ projectId, users }: Props) {
         <p className="text-sm font-medium text-dash-text">New action item</p>
         <button
           type="button"
-          onClick={() => { setIsOpen(false); setError(null); setDescription(""); setDueDate(""); }}
+          onClick={() => { setIsOpen(false); reset(); }}
           className="text-dash-text-dim hover:text-dash-text text-xs"
         >
           Cancel
@@ -107,6 +121,24 @@ export default function AddActionItemForm({ projectId, users }: Props) {
           />
         </div>
       </div>
+
+      {tasks && tasks.length > 0 && (
+        <div>
+          <label className="block text-xs text-dash-text-dim mb-1">Link to task (optional)</label>
+          <select
+            value={taskId}
+            onChange={(e) => setTaskId(e.target.value)}
+            className="w-full text-sm bg-dash-surface-2 border border-dash-border rounded-md px-3 py-2 text-dash-text focus:outline-none focus:border-dash-text-dim"
+          >
+            <option value="">— No task —</option>
+            {tasks.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.title}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {error && <p className="text-xs text-red-400">{error}</p>}
 

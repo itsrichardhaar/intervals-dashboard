@@ -15,10 +15,11 @@ export async function POST(
   if (!project) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const body = await req.json();
-  const { description, assigneeId, dueDate } = body as {
+  const { description, assigneeId, dueDate, taskId } = body as {
     description: string;
     assigneeId: string;
     dueDate?: string;
+    taskId?: string;
   };
 
   const validationError = validateActionItemInput({ description, assigneeId });
@@ -29,6 +30,17 @@ export async function POST(
   const assignee = await prisma.user.findUnique({ where: { id: assigneeId } });
   if (!assignee) return NextResponse.json({ error: "Assignee not found" }, { status: 400 });
 
+  // Validate taskId belongs to this project when provided
+  if (taskId !== undefined && taskId !== null && taskId !== "") {
+    if (typeof taskId !== "string") {
+      return NextResponse.json({ error: "Invalid taskId" }, { status: 400 });
+    }
+    const task = await prisma.intervalsTask.findFirst({
+      where: { id: taskId, projectId },
+    });
+    if (!task) return NextResponse.json({ error: "Task not found on this project" }, { status: 400 });
+  }
+
   const item = await prisma.actionItem.create({
     data: {
       description: description.trim(),
@@ -36,6 +48,7 @@ export async function POST(
       assigneeId,
       createdById: session.user.id,
       dueDate: dueDate ? new Date(dueDate) : null,
+      taskId: taskId || null,
     },
     include: { assignee: { select: { name: true } } },
   });

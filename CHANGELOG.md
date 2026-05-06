@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.18] - 2026-05-06
+
+### Added
+- Sync health indicator in sidebar footer — colour-coded dot + relative timestamp (green ≤15 min, yellow ≤30 min, red >30 min or failed); polls `/api/sync/status` every 2 minutes; shows "Syncing…" when a run is in progress
+- Sortable columns on Project Overview — click Project / Client / Status / Budget headers to sort; arrow indicator on active column; sort preserved across filter changes via URL param (`?sort=budget&dir=desc`); Budget % sort puts no-estimate projects last
+- Action Items: optional task-level linking — "Link to task" dropdown in AddActionItemForm; API validates task belongs to the project; linked task title shown in action item rows on project page and My Work
+
+---
+
 ## [0.1.17] - 2026-05-06
 
 ### Added

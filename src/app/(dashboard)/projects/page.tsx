@@ -103,20 +103,57 @@ function TeamChips({ members }: { members: string[] }) {
 const VALID_STATUSES = ["on_track", "at_risk", "blocked"] as const;
 type ProjectStatus = typeof VALID_STATUSES[number];
 
+const VALID_SORT_COLS = ["name", "client", "status", "budget"] as const;
+type SortCol = typeof VALID_SORT_COLS[number];
+
+const STATUS_SORT_ORDER: Record<ProjectStatus, number> = {
+  on_track: 0,
+  at_risk:  1,
+  blocked:  2,
+};
+
+function SortableColumnHeader({
+  label,
+  href,
+  active,
+  dir,
+  className = "",
+}: {
+  label: string;
+  href: string;
+  active: boolean;
+  dir: "asc" | "desc";
+  className?: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className={`inline-flex items-center gap-1 group hover:text-dash-text transition-colors ${active ? "text-dash-text" : "text-dash-text-muted"} ${className}`}
+    >
+      {label}
+      <span className={`text-[10px] ${active ? "opacity-100" : "opacity-0 group-hover:opacity-50"} transition-opacity`}>
+        {active ? (dir === "asc" ? "↑" : "↓") : "↕"}
+      </span>
+    </Link>
+  );
+}
+
 export default async function ProjectsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ client?: string; status?: string; stale?: string }>;
+  searchParams: Promise<{ client?: string; status?: string; stale?: string; sort?: string; dir?: string }>;
 }) {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 
-  const { client: clientParam, status: statusParam, stale: staleParam } = await searchParams;
+  const { client: clientParam, status: statusParam, stale: staleParam, sort: sortParam, dir: dirParam } = await searchParams;
   const currentClient = clientParam?.trim() || null;
   const currentStatuses = (statusParam?.split(",").filter(
     (s): s is ProjectStatus => VALID_STATUSES.includes(s as ProjectStatus)
   )) ?? [];
   const currentStale = staleParam === "1";
+  const currentSort: SortCol = VALID_SORT_COLS.includes(sortParam as SortCol) ? (sortParam as SortCol) : "name";
+  const currentDir: "asc" | "desc" = dirParam === "desc" ? "desc" : "asc";
 
   const projects = await prisma.intervalsProject.findMany({
     where: { status: "active" },
@@ -198,13 +235,49 @@ export default async function ProjectsPage({
     return true;
   });
 
+  // Apply sort
+  const sign = currentDir === "asc" ? 1 : -1;
+  const sorted = [...filtered].sort((a, b) => {
+    switch (currentSort) {
+      case "client": {
+        const ac = a.clientName ?? "";
+        const bc = b.clientName ?? "";
+        return sign * ac.localeCompare(bc) || a.name.localeCompare(b.name);
+      }
+      case "status":
+        return sign * (STATUS_SORT_ORDER[a.effectiveStatus] - STATUS_SORT_ORDER[b.effectiveStatus]) || a.name.localeCompare(b.name);
+      case "budget": {
+        // No estimates → sort last regardless of direction
+        const ap = a.totalEstimated > 0 ? a.totalLogged / a.totalEstimated : Infinity;
+        const bp = b.totalEstimated > 0 ? b.totalLogged / b.totalEstimated : Infinity;
+        if (ap === Infinity && bp === Infinity) return a.name.localeCompare(b.name);
+        if (ap === Infinity) return 1;
+        if (bp === Infinity) return -1;
+        return sign * (ap - bp) || a.name.localeCompare(b.name);
+      }
+      default: // "name"
+        return sign * a.name.localeCompare(b.name);
+    }
+  });
+
+  // Helper: build URL for a sort column click (preserves filter params, toggles direction)
+  function sortUrl(col: SortCol): string {
+    const params = new URLSearchParams();
+    if (currentClient) params.set("client", currentClient);
+    if (currentStatuses.length > 0) params.set("status", currentStatuses.join(","));
+    if (currentStale) params.set("stale", "1");
+    params.set("sort", col);
+    params.set("dir", col === currentSort && currentDir === "asc" ? "desc" : "asc");
+    return `/projects?${params.toString()}`;
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-xl font-semibold text-dash-text mb-1">Projects</h1>
           <p className="text-dash-text-dim text-sm">
-            {filtered.length} of {enriched.length} active project{enriched.length !== 1 ? "s" : ""}
+            {sorted.length} of {enriched.length} active project{enriched.length !== 1 ? "s" : ""}
           </p>
         </div>
         <ProjectFilterBar
@@ -212,6 +285,8 @@ export default async function ProjectsPage({
           currentClient={currentClient}
           currentStatuses={currentStatuses}
           currentStale={currentStale}
+          currentSort={currentSort}
+          currentDir={currentDir}
         />
       </div>
 
@@ -219,17 +294,17 @@ export default async function ProjectsPage({
         <table className="w-full text-sm">
           <thead className="bg-dash-surface">
             <tr>
-              <th className="text-left px-4 py-3 text-dash-text-muted font-medium w-[28%]">
-                Project
+              <th className="text-left px-4 py-3 font-medium w-[28%]">
+                <SortableColumnHeader label="Project" href={sortUrl("name")} active={currentSort === "name"} dir={currentDir} />
               </th>
-              <th className="text-left px-4 py-3 text-dash-text-muted font-medium hidden md:table-cell w-[15%]">
-                Client
+              <th className="text-left px-4 py-3 font-medium hidden md:table-cell w-[15%]">
+                <SortableColumnHeader label="Client" href={sortUrl("client")} active={currentSort === "client"} dir={currentDir} />
               </th>
-              <th className="text-left px-4 py-3 text-dash-text-muted font-medium w-[12%]">
-                Status
+              <th className="text-left px-4 py-3 font-medium w-[12%]">
+                <SortableColumnHeader label="Status" href={sortUrl("status")} active={currentSort === "status"} dir={currentDir} />
               </th>
-              <th className="text-left px-4 py-3 text-dash-text-muted font-medium hidden lg:table-cell w-[18%]">
-                Budget
+              <th className="text-left px-4 py-3 font-medium hidden lg:table-cell w-[18%]">
+                <SortableColumnHeader label="Budget" href={sortUrl("budget")} active={currentSort === "budget"} dir={currentDir} />
               </th>
               <th className="text-left px-4 py-3 text-dash-text-muted font-medium hidden xl:table-cell">
                 Latest Update
@@ -243,7 +318,7 @@ export default async function ProjectsPage({
             </tr>
           </thead>
           <tbody className="divide-y divide-dash-border">
-            {filtered.map((p) => (
+            {sorted.map((p) => (
               <tr key={p.id} className="bg-dash-bg hover:bg-dash-surface transition-colors">
                 <td className="px-4 py-3">
                   <Link
@@ -309,7 +384,7 @@ export default async function ProjectsPage({
                 </td>
               </tr>
             ))}
-            {filtered.length === 0 && (
+            {sorted.length === 0 && (
               <tr>
                 <td colSpan={7} className="px-4 py-8 text-center text-dash-text-dim">
                   {enriched.length === 0

@@ -12,6 +12,7 @@ import {
   Target,
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
+import SyncHealthBadge from "@/components/SyncHealthBadge";
 
 interface SidebarProps {
   user: { name?: string | null; email?: string | null };
@@ -90,6 +91,7 @@ export default function Sidebar({ user }: SidebarProps) {
       </nav>
 
       <div className="px-3 py-3 border-t border-dash-border space-y-2">
+        <SyncHealthBadge />
         <ThemeToggle />
         <div className="flex items-center justify-between">
           <p className="text-xs text-dash-text-dim truncate">{user.name ?? user.email}</p>

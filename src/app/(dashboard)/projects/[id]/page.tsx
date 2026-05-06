@@ -90,7 +90,10 @@ export default async function ProjectDetailPage({
       prisma.actionItem.findMany({
         where: { projectId: id, completedAt: null },
         orderBy: { createdAt: "asc" },
-        include: { assignee: { select: { id: true, name: true, email: true } } },
+        include: {
+          assignee: { select: { id: true, name: true, email: true } },
+          task: { select: { title: true } },
+        },
       }),
       prisma.weeklyStatusUpdate.findMany({
         where: { projectId: id },
@@ -392,7 +395,15 @@ export default async function ProjectDetailPage({
           <h2 className="text-sm font-medium text-dash-text-muted uppercase tracking-wide">
             Action Items
           </h2>
-          {!isArchived && <AddActionItemForm projectId={project.id} users={users} />}
+          {!isArchived && (
+            <AddActionItemForm
+              projectId={project.id}
+              users={users}
+              tasks={project.tasks
+                .filter((t) => normalizeTaskStatus(t.status) !== "closed")
+                .map((t) => ({ id: t.id, title: t.title }))}
+            />
+          )}
         </div>
 
         {actionItems.length === 0 ? (
@@ -423,6 +434,9 @@ export default async function ProjectDetailPage({
                     </div>
                     <div className="flex items-center gap-3 text-xs text-dash-text-dim">
                       <span>{item.assignee.name ?? item.assignee.email}</span>
+                      {item.task && (
+                        <span className="truncate max-w-[200px]">on: {item.task.title}</span>
+                      )}
                       {item.dueDate && (
                         <span className={overdue ? "text-red-400" : ""}>
                           Due {formatDate(item.dueDate)}
