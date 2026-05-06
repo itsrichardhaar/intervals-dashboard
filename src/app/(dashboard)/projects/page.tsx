@@ -4,8 +4,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { calculateProjectStatus } from "@/lib/calculators/projectStatus";
 import ProjectStatusControl from "@/components/ProjectStatusControl";
-
-type ProjectStatus = "on_track" | "at_risk" | "blocked";
+import ProjectFilterBar from "@/components/ProjectFilterBar";
 
 function BudgetBar({ logged, estimated }: { logged: number; estimated: number }) {
   if (estimated === 0) {
@@ -100,9 +99,22 @@ function TeamChips({ members }: { members: string[] }) {
   );
 }
 
-export default async function ProjectsPage() {
+const VALID_STATUSES = ["on_track", "at_risk", "blocked"] as const;
+type ProjectStatus = typeof VALID_STATUSES[number];
+
+export default async function ProjectsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ client?: string; status?: string }>;
+}) {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
+
+  const { client: clientParam, status: statusParam } = await searchParams;
+  const currentClient = clientParam?.trim() || null;
+  const currentStatuses = (statusParam?.split(",").filter(
+    (s): s is ProjectStatus => VALID_STATUSES.includes(s as ProjectStatus)
+  )) ?? [];
 
   const projects = await prisma.intervalsProject.findMany({
     where: { status: "active" },
@@ -169,11 +181,32 @@ export default async function ProjectsPage() {
     };
   });
 
+  // Distinct client names for the filter dropdown (from ALL projects, not filtered)
+  const allClients = [...new Set(
+    projects.map((p) => p.clientName).filter((c): c is string => c !== null && c !== "")
+  )].sort();
+
+  // Apply active filters
+  const filtered = enriched.filter((p) => {
+    if (currentClient && p.clientName !== currentClient) return false;
+    if (currentStatuses.length > 0 && !currentStatuses.includes(p.effectiveStatus)) return false;
+    return true;
+  });
+
   return (
     <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold text-dash-text mb-1">Projects</h1>
-        <p className="text-dash-text-dim text-sm">{enriched.length} active projects</p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-xl font-semibold text-dash-text mb-1">Projects</h1>
+          <p className="text-dash-text-dim text-sm">
+            {filtered.length} of {enriched.length} active project{enriched.length !== 1 ? "s" : ""}
+          </p>
+        </div>
+        <ProjectFilterBar
+          clients={allClients}
+          currentClient={currentClient}
+          currentStatuses={currentStatuses}
+        />
       </div>
 
       <div className="rounded-lg border border-dash-border overflow-hidden">
@@ -204,7 +237,7 @@ export default async function ProjectsPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-dash-border">
-            {enriched.map((p) => (
+            {filtered.map((p) => (
               <tr key={p.id} className="bg-dash-bg hover:bg-dash-surface transition-colors">
                 <td className="px-4 py-3">
                   <Link
@@ -270,10 +303,12 @@ export default async function ProjectsPage() {
                 </td>
               </tr>
             ))}
-            {enriched.length === 0 && (
+            {filtered.length === 0 && (
               <tr>
                 <td colSpan={7} className="px-4 py-8 text-center text-dash-text-dim">
-                  No active projects found. Run a sync to populate data.
+                  {enriched.length === 0
+                    ? "No active projects found. Run a sync to populate data."
+                    : "No projects match the current filters."}
                 </td>
               </tr>
             )}

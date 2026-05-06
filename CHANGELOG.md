@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.16] - 2026-05-06
+
+### Added
+- Status filter on All My Tasks: multi-select checkboxes (Open/In Progress/Internal Review/Client Review/Closed), default excludes Closed, instant client-side filtering, persists within session via `sessionStorage`
+- `filterTasks` pure function with 11 unit tests (183 total)
+- `FilteredTaskList` client component replaces the Open/All toggle
+- Client + Project Status filters on Project Overview: Client dropdown + On Track/At Risk/Blocked pills, URL-based (shareable), server-side filtered render, combinable filters with "Clear filters" reset
+
+---
+
 ## [0.1.15] - 2026-05-05
 
 ### Added
