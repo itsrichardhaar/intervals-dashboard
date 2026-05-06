@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.13] - 2026-05-05
+
+### Added
+- `computeThemeVars(theme, brightness, hue, intensity)` pure function — computes all 10 `--dash-*` CSS variable values in HSL space (10 unit tests)
+- `ThemeProvider` client component — reads preferences from `localStorage` on mount, applies computed CSS variables to `document.documentElement`, re-applies on any pref change
+- Flash-prevention inline script in root layout — applies correct theme vars synchronously before first React paint (no visible flash on reload)
+- `useTheme()` hook for accessing/updating theme preferences from any client component
+- `ThemeToggle` now wired to `ThemeProvider` context instead of direct `localStorage`
+
+---
+
 ## [0.1.12] - 2026-05-05
 
 ### Added
