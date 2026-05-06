@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.14] - 2026-05-05
+
+### Added
+- `preferences Json?` column on User model with Prisma migration (`20260506124133_add_user_preferences`)
+- `PUT /api/users/me/preferences` — authenticated endpoint to persist `{ theme, brightness, hue, intensity }` with range validation
+- Settings page "Display Customization" section: Theme selector, Brightness/Intensity/Hue sliders with live preview and reset button
+- `ThemeProvider` now syncs preferences to DB (debounced 600 ms) on every change
+- Root layout loads server-side preferences from DB and bakes them into the flash-prevention script — no flash on first load from a new device
+
+---
+
 ## [0.1.13] - 2026-05-05
 
 ### Added

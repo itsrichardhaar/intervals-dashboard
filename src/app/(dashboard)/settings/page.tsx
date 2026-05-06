@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import DisplayCustomization from "@/components/DisplayCustomization";
 
 interface IntervalsPerson {
   id: string;
@@ -162,6 +163,9 @@ export default function SettingsPage() {
   return (
     <div className="max-w-3xl mx-auto px-6 py-8 space-y-10">
       <h1 className="text-xl font-semibold text-dash-text">Settings</h1>
+
+      {/* Display Customization */}
+      <DisplayCustomization />
 
       {/* Invite User */}
       <section>

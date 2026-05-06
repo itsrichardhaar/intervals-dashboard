@@ -100,12 +100,21 @@ export function computeThemeVars(
   };
 }
 
-/** The inline script string for flash prevention. Keep in sync with computeThemeVars. */
-export const FLASH_PREVENTION_SCRIPT = `(function(){
+/**
+ * Build the inline flash-prevention script.
+ * serverPrefs is baked into the script so it works even on a brand-new device
+ * before localStorage has been populated. localStorage is preferred if present
+ * (more recent local changes win over DB state).
+ */
+export function buildFlashScript(serverPrefs: ThemePrefs): string {
+  const sp = JSON.stringify(serverPrefs);
+  return `(function(){
+  var SP=${sp};
   var B={mid:{bg:10.2,su:14.5,s2:18.8,inn:22.7,bd:21.2,tH:60,tS:5,tL:90.9,tmS:2,tmL:59.6,tdS:1,tdL:34.9,aH:38,aS:91,aL:55},dark:{bg:5.1,su:8.6,s2:12.5,inn:16.1,bd:16.5,tH:60,tS:5,tL:92.9,tmS:2,tmL:53.3,tdS:1,tdL:28.2,aH:38,aS:91,aL:55},light:{bg:93.7,su:100,s2:91,inn:86.3,bd:83.1,tH:0,tS:0,tL:10.2,tmS:0,tmL:41.6,tdS:0,tdL:66.7,aH:38,aS:88,aL:40}};
   function h(hv,s,l){return 'hsl('+Math.round(hv)+' '+Math.round(s*10)/10+'% '+Math.round(l*10)/10+'%)';}
   try{
-    var p={};try{p=JSON.parse(localStorage.getItem('dash-prefs')||'{}');}catch(e){}
+    var ls={};try{var raw=localStorage.getItem('dash-prefs');if(raw)ls=JSON.parse(raw);}catch(e){}
+    var p=Object.keys(ls).length>0?ls:SP;
     var t=['mid','dark','light'].indexOf(p.theme)>=0?p.theme:'mid';
     var bri=typeof p.brightness==='number'?p.brightness:100;
     var hu=typeof p.hue==='number'?p.hue:0;
@@ -129,3 +138,4 @@ export const FLASH_PREVENTION_SCRIPT = `(function(){
     el.style.setProperty('--dash-accent-soft','color-mix(in srgb, '+acc+' 15%, transparent)');
   }catch(e){}
 })();`;
+}
