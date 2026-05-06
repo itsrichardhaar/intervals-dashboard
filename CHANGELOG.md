@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.20] - 2026-05-06
+
+### Fixed
+- Vercel build failure after Prisma 7 migration — `PrismaClient` now uses the `@prisma/adapter-pg` driver adapter (required by Prisma 7 when `url` is not in `schema.prisma`)
+
+---
+
 ## [0.1.19] - 2026-05-06
 
 ### Changed
