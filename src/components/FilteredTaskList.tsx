@@ -214,43 +214,43 @@ export default function FilteredTaskList({ tasks }: { tasks: SerializedTask[] })
                   key={task.id}
                   className={`${task.overdue ? "bg-red-950/30" : "bg-dash-bg"} hover:bg-dash-surface`}
                 >
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3 max-w-[200px]">
                     <Link
                       href={`/projects/${task.project.id}`}
-                      className={`font-medium hover:text-dash-accent transition-colors ${task.overdue ? "text-red-300" : "text-dash-text"}`}
+                      className={`block truncate font-medium hover:text-dash-accent transition-colors ${task.overdue ? "text-red-300" : "text-dash-text"}`}
                     >
                       {task.title}
                     </Link>
                     {!task.estimatedHours && task.normalizedStatus !== "closed" && (
-                      <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-yellow-900/50 text-yellow-400">
+                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-yellow-900/50 text-yellow-400 whitespace-nowrap">
                         No estimate
                       </span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-dash-text-muted hidden sm:table-cell">
-                    {task.project.name}
+                  <td className="px-4 py-3 text-dash-text-muted hidden sm:table-cell max-w-[160px]">
+                    <span className="block truncate">{task.project.name}</span>
                   </td>
-                  <td className="px-4 py-3">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${STATUS_BADGE[task.normalizedStatus] ?? "bg-dash-surface-2 text-dash-text-muted"}`}>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium whitespace-nowrap ${STATUS_BADGE[task.normalizedStatus] ?? "bg-dash-surface-2 text-dash-text-muted"}`}>
                       {STATUS_LABELS[task.normalizedStatus] ?? task.normalizedStatus}
                     </span>
                   </td>
-                  <td className="px-4 py-3 hidden md:table-cell">
+                  <td className="px-4 py-3 hidden md:table-cell whitespace-nowrap">
                     <span className={task.overdue ? "text-red-400 font-medium" : "text-dash-text-muted"}>
                       {formatDate(task.dueDate)}
                     </span>
                     {task.overdue && (
-                      <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-red-900/60 text-red-300">
+                      <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-red-900/60 text-red-300 whitespace-nowrap">
                         Overdue
                       </span>
                     )}
                     {!task.dueDate && (
-                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-dash-surface-2 text-dash-text-dim border border-dash-border">
+                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-dash-surface-2 text-dash-text-dim border border-dash-border whitespace-nowrap">
                         No due date
                       </span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-right text-dash-text-muted hidden lg:table-cell tabular-nums">
+                  <td className="px-4 py-3 text-right text-dash-text-muted hidden lg:table-cell tabular-nums whitespace-nowrap">
                     {task.estimatedHours !== null ? `${task.estimatedHours}h` : "—"}
                     {" / "}
                     {task.loggedHours > 0 ? `${task.loggedHours}h` : "0h"}

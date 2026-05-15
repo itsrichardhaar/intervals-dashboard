@@ -46,7 +46,7 @@ function StatusBadge({ status }: { status: TaskStatus }) {
   };
   return (
     <span
-      className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${styles[status]}`}
+      className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium whitespace-nowrap ${styles[status]}`}
     >
       {labels[status]}
     </span>
@@ -330,29 +330,29 @@ export default async function HomePage({
                         key={task.id}
                         className={`${overdue ? "bg-red-950/30" : "bg-dash-bg"} hover:bg-dash-surface`}
                       >
-                        <td className="px-4 py-3">
+                        <td className="px-4 py-3 max-w-[180px]">
                           <span
-                            className={`font-medium ${overdue ? "text-red-300" : "text-dash-text"}`}
+                            className={`block truncate font-medium ${overdue ? "text-red-300" : "text-dash-text"}`}
                           >
                             {task.title}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-dash-text-muted hidden sm:table-cell">
-                          {task.projectName}
+                        <td className="px-4 py-3 text-dash-text-muted hidden sm:table-cell max-w-[160px]">
+                          <span className="block truncate">{task.projectName}</span>
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="px-4 py-3 whitespace-nowrap">
                           <span
                             className={`font-medium ${overdue ? "text-red-400" : "text-dash-text"}`}
                           >
                             {formatDate(task.dueDate)}
                           </span>
                           {overdue && (
-                            <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-red-900/60 text-red-300">
+                            <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-red-900/60 text-red-300 whitespace-nowrap">
                               Overdue
                             </span>
                           )}
                         </td>
-                        <td className="px-4 py-3 text-right text-dash-text-muted hidden md:table-cell tabular-nums">
+                        <td className="px-4 py-3 text-right text-dash-text-muted hidden md:table-cell tabular-nums whitespace-nowrap">
                           {task.estimatedHours !== null
                             ? `${task.estimatedHours}h`
                             : "—"}{" "}
@@ -361,7 +361,7 @@ export default async function HomePage({
                             ? `${task.loggedHours}h`
                             : "0h"}
                         </td>
-                        <td className="px-4 py-3 hidden lg:table-cell">
+                        <td className="px-4 py-3 hidden lg:table-cell whitespace-nowrap">
                           <StatusBadge status={task.status} />
                         </td>
                       </tr>
