@@ -2,11 +2,9 @@ import { auth } from "@/auth";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { generateHTML } from "@tiptap/core";
-import StarterKit from "@tiptap/starter-kit";
-import { type JSONContent } from "@tiptap/core";
 import SopStatusActions from "@/components/SopStatusActions";
 import SopPrintArea from "@/components/SopPrintArea";
+import SopBodyRenderer from "@/components/SopBodyRenderer";
 import { Pencil } from "lucide-react";
 
 function timeAgo(date: Date): string {
@@ -46,10 +44,6 @@ export default async function SopReadPage({ params }: { params: Promise<{ id: st
   });
 
   if (!sop) notFound();
-
-  const bodyHtml = sop.body
-    ? generateHTML(sop.body as JSONContent, [StarterKit])
-    : null;
 
   const isEditable = sop.status !== "archived";
 
@@ -109,14 +103,7 @@ export default async function SopReadPage({ params }: { params: Promise<{ id: st
 
         {/* Body */}
         <div className="bg-dash-surface border border-dash-border rounded-lg px-6 py-5">
-          {bodyHtml ? (
-            <div
-              className="sop-prose"
-              dangerouslySetInnerHTML={{ __html: bodyHtml }}
-            />
-          ) : (
-            <p className="text-sm text-dash-text-dim italic">No procedure written yet.</p>
-          )}
+          <SopBodyRenderer content={sop.body as Record<string, unknown> | null} />
         </div>
       </SopPrintArea>
 
