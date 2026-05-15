@@ -36,11 +36,10 @@ export default function LoginPage() {
     <div className="min-h-screen bg-dash-bg flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <img
-            src="/springer-icon.svg"
-            alt="Springer Studios"
-            className="w-16 h-16 mx-auto mb-4"
-          />
+          <svg className="w-16 h-16 mx-auto mb-4" viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
+            <rect fill="#cbdc2a" width="1080" height="1080"/>
+            <polygon fill="#181613" points="840 533.94 840 331.39 540 158.19 240 331.39 240 443.02 700.22 709.02 643.25 709.02 540 768.63 372.66 672.02 372.66 621.73 240 545.14 240 748.61 540 921.81 840 748.61 840 636.06 379.78 370.57 437.47 370.57 540 311.37 707.34 407.98 707.34 457.35 840 533.94"/>
+          </svg>
           <h1 className="text-2xl font-semibold text-dash-text">Springer OS</h1>
           <p className="text-dash-text-muted text-sm mt-1">Sign in to your account</p>
         </div>
