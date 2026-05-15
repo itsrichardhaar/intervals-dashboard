@@ -42,7 +42,7 @@ export default function Sidebar({ user }: SidebarProps) {
   return (
     <aside className="w-56 bg-dash-surface border-r border-dash-border flex flex-col shrink-0">
       <div className="px-4 py-5 border-b border-dash-border">
-        <p className="text-sm font-semibold text-dash-text truncate">Project Dashboard</p>
+        <p className="text-sm font-semibold text-dash-text truncate">Springer OS</p>
         <p className="text-xs text-dash-text-dim truncate mt-0.5">{user.email}</p>
       </div>
 

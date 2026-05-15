@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.21] - 2026-05-15
+
+### Changed
+- Renamed app title from "Project Dashboard" to "Springer OS" in browser tab and sidebar
+- Updated favicon to Springer geometric S mark (SVG + ICO)
+
+---
+
 ## [0.1.20] - 2026-05-06
 
 ### Fixed

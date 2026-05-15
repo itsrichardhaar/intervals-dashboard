@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Project Dashboard",
+  title: "Springer OS",
   description: "Internal project management dashboard",
 };
 
