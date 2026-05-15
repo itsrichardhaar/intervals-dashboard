@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.22] - 2026-05-15
+
+### Added
+- SOP builder: create, edit, publish, archive, and restore Standard Operating Procedures
+- SOP library with Overview (published), Drafts, and Archive views
+- TipTap rich-text editor with toolbar — paste-friendly from Google Docs/Word
+- Inline category combobox — create categories on the fly while authoring
+- Clean read view per SOP with Purpose, Scope, and procedure body
+- Status transition actions: Publish, Unpublish, Archive, Restore to Draft
+- PDF download via react-to-print on the SOP read view
+
+---
+
 ## [0.1.21] - 2026-05-15
 
 ### Changed

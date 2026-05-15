@@ -1,0 +1,3 @@
+# SOP body is a single rich-text field, not a structured section editor
+
+The SOP body is stored as a single TipTap/ProseMirror JSON blob rather than discrete typed sections (e.g. "Step Block", "Warning Block") or a drag-and-drop block editor. We considered both a structured section model (separate DB records per section, explicit types) and TipTap with drag handles (block-level reordering), and chose plain rich text. The primary driver was copy-paste compatibility — the majority of existing SOPs live in Google Docs or Word, and authors need to paste content in quickly without reformatting. A structured section model would require authors to rebuild that content block-by-block. The JSON blob format is the main migration cost if structured sections are added later.

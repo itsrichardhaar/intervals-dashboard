@@ -64,3 +64,52 @@ body {
   color: var(--dash-text);
   font-family: var(--font-geist-sans, Arial, Helvetica, sans-serif);
 }
+
+/* ── SOP body prose styles ───────────────────────────────────────────────── */
+.sop-prose { color: var(--dash-text); font-size: 0.875rem; line-height: 1.7; }
+.sop-prose h1,.sop-prose h2,.sop-prose h3,.sop-prose h4 { font-weight: 600; color: var(--dash-text); margin-top: 1.5em; margin-bottom: 0.5em; }
+.sop-prose h2 { font-size: 1.1rem; }
+.sop-prose h3 { font-size: 1rem; }
+.sop-prose p  { margin-top: 0; margin-bottom: 0.75em; }
+.sop-prose p:last-child { margin-bottom: 0; }
+.sop-prose strong { font-weight: 600; color: var(--dash-text); }
+.sop-prose em { font-style: italic; }
+.sop-prose ul,.sop-prose ol { padding-left: 1.5rem; margin-bottom: 0.75em; }
+.sop-prose ul { list-style-type: disc; }
+.sop-prose ol { list-style-type: decimal; }
+.sop-prose li { margin-bottom: 0.25em; }
+.sop-prose code { font-family: var(--font-geist-mono, monospace); font-size: 0.8em; background: var(--dash-surface-2); padding: 0.1em 0.35em; border-radius: 3px; }
+.sop-prose pre  { background: var(--dash-inset); border-radius: 6px; padding: 1rem; overflow-x: auto; margin-bottom: 0.75em; }
+.sop-prose pre code { background: none; padding: 0; }
+.sop-prose blockquote { border-left: 3px solid var(--dash-border); padding-left: 1rem; color: var(--dash-text-muted); margin: 0 0 0.75em; }
+.sop-prose hr { border: none; border-top: 1px solid var(--dash-border); margin: 1.5em 0; }
+.sop-prose a { color: var(--dash-accent); text-decoration: underline; }
+
+/* ── Print styles ────────────────────────────────────────────────────────── */
+@media print {
+  /* Hide everything by default */
+  body > * { display: none !important; }
+  /* Show only the print content */
+  .sop-print-content,
+  .sop-print-content * { display: revert !important; }
+  /* Force light background and dark text */
+  .sop-print-content { background: white !important; color: #1a1a1a !important; padding: 0 !important; }
+  /* Clean up cards — no rounded borders, no shadows */
+  .sop-print-content [class*="rounded"],
+  .sop-print-content [class*="border"] { border-radius: 0 !important; border-color: #e0e0e0 !important; box-shadow: none !important; }
+  /* Ensure backgrounds don't print as grey boxes */
+  .sop-print-content [class*="bg-dash"] { background: white !important; }
+  /* Page break handling */
+  h1, h2, h3 { page-break-after: avoid; }
+  p, li       { orphans: 3; widows: 3; }
+  .sop-prose  { color: #1a1a1a !important; }
+}
+
+/* TipTap placeholder */
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: var(--dash-text-dim);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}

@@ -10,6 +10,7 @@ import {
   ListChecks,
   Settings,
   Target,
+  BookOpen,
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import SyncHealthBadge from "@/components/SyncHealthBadge";
@@ -32,6 +33,11 @@ const NAV = [
   { label: "My Work",     href: "/my-work",      icon: ListChecks, children: [
     { label: "All My Tasks",    href: "/my-work/tasks"        },
     { label: "My Action Items", href: "/my-work/action-items" },
+  ]},
+  { label: "SOPs",        href: "/sop",           icon: BookOpen, children: [
+    { label: "Overview", href: "/sop"          },
+    { label: "Drafts",   href: "/sop/drafts"   },
+    { label: "Archive",  href: "/sop/archive"  },
   ]},
   { label: "Settings",    href: "/settings",     icon: Settings },
 ];

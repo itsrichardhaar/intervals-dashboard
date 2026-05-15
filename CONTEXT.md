@@ -2,6 +2,38 @@
 
 ## Glossary
 
+### SOP (Standard Operating Procedure)
+A document that records how a specific repeatable task or workflow is performed by the team. Strictly process-oriented — not a policy, reference guide, or role description. Has three fixed metadata fields (Title, Purpose, Scope) and a rich-text body. Exists in one of three statuses: Draft, Published, or Archived.
+_Avoid_: Process doc, playbook, guide, runbook
+
+### SOP Purpose
+A single sentence stating why the SOP process exists — the outcome it ensures. Header metadata, not body content.
+_Avoid_: Goal, objective, description
+
+### SOP Scope
+A statement of who performs the process and when it applies. Header metadata, not body content.
+_Avoid_: Audience, applicability
+
+### SOP Status
+The publication state of an SOP. Three values: **Draft** (being written, not ready for use), **Published** (approved and available to all team members), **Archived** (no longer active, read-only, hidden from the main Overview). Any user can change status unilaterally — no approval gate.
+
+Allowed transitions:
+- Draft → Published (publish)
+- Published → Draft (unpublish — process changing, needs rewrite)
+- Draft → Archived (abandon)
+- Published → Archived (retire)
+- Archived → Draft (restore — always lands in Draft, not directly back to Published)
+
+_Avoid_: Active, inactive, deleted
+
+### SOP Author
+The team member who originally created an SOP. Permanently recorded at creation and does not change when others edit. Distinct from the last editor. Displayed alongside "last edited by" in list views as the person to ask questions about the process.
+_Avoid_: Owner, creator, assignee
+
+### SOP Category
+A team-defined label that groups related SOPs (e.g. "Client Onboarding", "HR", "Operations"). Created inline when authoring an SOP — no pre-configuration required. Shared across all SOPs.
+_Avoid_: Tag, type, department
+
 ### Active Project
 A project whose status in Intervals is not "Closed" or "Completed". Intervals is the source of truth for project state. Active Projects appear on the Project Overview page.
 
@@ -46,6 +78,10 @@ Team
 My Work
   ├── All My Tasks      ← full task list, grouped by project, sorted by due date
   └── My Action Items   ← all open Action Items assigned to me
+SOP
+  ├── Overview          ← all Published SOPs, table view
+  ├── Drafts            ← all Draft SOPs, table view
+  └── Archive           ← all Archived SOPs, read-only table view
 Settings
   └── Users             ← invite users, manage Intervals mapping
 ```

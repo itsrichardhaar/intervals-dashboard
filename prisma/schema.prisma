@@ -26,6 +26,8 @@ model User {
   actionItemsCreated    ActionItem[]          @relation("ActionItemCreatedBy")
   actionItemsAssigned   ActionItem[]          @relation("ActionItemAssignedTo")
   projectStatusOverrides ProjectStatusOverride[]
+  sopsAuthored          Sop[]                 @relation("SopAuthor")
+  sopsLastEdited        Sop[]                 @relation("SopUpdatedBy")
 }
 
 model Account {
@@ -232,6 +234,34 @@ model ProjectStatusOverride {
 
   project IntervalsProject @relation(fields: [projectId], references: [id])
   setBy   User             @relation(fields: [setById], references: [id])
+}
+
+// ─── SOPs ────────────────────────────────────────────────────────────────────
+
+model SopCategory {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+
+  sops Sop[]
+}
+
+model Sop {
+  id          String   @id @default(cuid())
+  title       String
+  purpose     String?
+  scope       String?
+  body        Json?
+  status      String   @default("draft") // "draft" | "published" | "archived"
+  categoryId  String?
+  authorId    String
+  updatedById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  category  SopCategory? @relation(fields: [categoryId], references: [id])
+  author    User         @relation("SopAuthor", fields: [authorId], references: [id])
+  updatedBy User         @relation("SopUpdatedBy", fields: [updatedById], references: [id])
 }
 
 // ─── Sync Log ────────────────────────────────────────────────────────────────
