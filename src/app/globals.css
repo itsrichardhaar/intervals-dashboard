@@ -65,6 +65,9 @@ body {
   font-family: var(--font-geist-sans, Arial, Helvetica, sans-serif);
 }
 
+a, button, [role="button"], select, label[for], summary { cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+
 /* ── SOP body prose styles ───────────────────────────────────────────────── */
 .sop-prose { color: var(--dash-text); font-size: 0.875rem; line-height: 1.7; }
 .sop-prose h1,.sop-prose h2,.sop-prose h3,.sop-prose h4 { font-weight: 600; color: var(--dash-text); margin-top: 1.5em; margin-bottom: 0.5em; }
