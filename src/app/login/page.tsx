@@ -36,7 +36,12 @@ export default function LoginPage() {
     <div className="min-h-screen bg-dash-bg flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-semibold text-dash-text">Project Dashboard</h1>
+          <img
+            src="/springer-icon.svg"
+            alt="Springer Studios"
+            className="w-16 h-16 mx-auto mb-4"
+          />
+          <h1 className="text-2xl font-semibold text-dash-text">Springer OS</h1>
           <p className="text-dash-text-muted text-sm mt-1">Sign in to your account</p>
         </div>
 
