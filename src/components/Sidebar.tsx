@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
@@ -11,6 +12,7 @@ import {
   Settings,
   Target,
   BookOpen,
+  ChevronDown,
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import SyncHealthBadge from "@/components/SyncHealthBadge";
@@ -45,6 +47,23 @@ const NAV = [
 export default function Sidebar({ user }: SidebarProps) {
   const pathname = usePathname();
 
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = {};
+    for (const item of NAV) {
+      if (item.children) {
+        const isInSection =
+          pathname === item.href ||
+          (item.href !== "/" && pathname.startsWith(item.href));
+        initial[item.href] = isInSection;
+      }
+    }
+    return initial;
+  });
+
+  function toggle(href: string) {
+    setOpenSections((prev) => ({ ...prev, [href]: !prev[href] }));
+  }
+
   return (
     <aside className="w-56 bg-dash-surface border-r border-dash-border flex flex-col shrink-0">
       <div className="px-4 py-5 border-b border-dash-border">
@@ -55,43 +74,66 @@ export default function Sidebar({ user }: SidebarProps) {
       <nav className="flex-1 px-2 py-3 space-y-0.5 overflow-y-auto">
         {NAV.map((item) => {
           const Icon = item.icon;
-          const isActive =
+          const isInSection =
             pathname === item.href ||
-            (item.href !== "/" && pathname.startsWith(item.href + "/"));
+            (item.href !== "/" && pathname.startsWith(item.href));
+          const isOpen = openSections[item.href] ?? false;
+
+          if (item.children) {
+            return (
+              <div key={item.href}>
+                <button
+                  onClick={() => toggle(item.href)}
+                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${
+                    isInSection
+                      ? "bg-dash-surface-2 text-dash-accent"
+                      : "text-dash-text-muted hover:bg-dash-surface-2 hover:text-dash-text"
+                  }`}
+                >
+                  <Icon size={15} className="shrink-0" />
+                  <span className="flex-1 text-left">{item.label}</span>
+                  <ChevronDown
+                    size={13}
+                    className={`shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+                  />
+                </button>
+                {isOpen && (
+                  <div className="ml-6 mt-0.5 space-y-0.5">
+                    {item.children.map((child) => {
+                      const childActive = pathname === child.href;
+                      return (
+                        <Link
+                          key={child.href}
+                          href={child.href}
+                          className={`block px-3 py-1.5 rounded-md text-xs transition-colors ${
+                            childActive
+                              ? "bg-dash-surface-2 text-dash-accent"
+                              : "text-dash-text-dim hover:bg-dash-surface-2 hover:text-dash-text-muted"
+                          }`}
+                        >
+                          {child.label}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          }
+
           return (
-            <div key={item.href}>
-              <Link
-                href={item.href}
-                className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${
-                  isActive
-                    ? "bg-dash-surface-2 text-dash-accent"
-                    : "text-dash-text-muted hover:bg-dash-surface-2 hover:text-dash-text"
-                }`}
-              >
-                <Icon size={15} className="shrink-0" />
-                {item.label}
-              </Link>
-              {item.children && (
-                <div className="ml-6 mt-0.5 space-y-0.5">
-                  {item.children.map((child) => {
-                    const childActive = pathname === child.href;
-                    return (
-                      <Link
-                        key={child.href}
-                        href={child.href}
-                        className={`block px-3 py-1.5 rounded-md text-xs transition-colors ${
-                          childActive
-                            ? "bg-dash-surface-2 text-dash-accent"
-                            : "text-dash-text-dim hover:bg-dash-surface-2 hover:text-dash-text-muted"
-                        }`}
-                      >
-                        {child.label}
-                      </Link>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${
+                isInSection
+                  ? "bg-dash-surface-2 text-dash-accent"
+                  : "text-dash-text-muted hover:bg-dash-surface-2 hover:text-dash-text"
+              }`}
+            >
+              <Icon size={15} className="shrink-0" />
+              {item.label}
+            </Link>
           );
         })}
       </nav>
