@@ -55,14 +55,14 @@
   --color-dash-text-dim: var(--dash-text-dim);
   --color-dash-border: var(--dash-border);
   --color-dash-accent: var(--dash-accent);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: "neuzeit-grotesk", system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
 }
 
 body {
   background: var(--dash-bg);
   color: var(--dash-text);
-  font-family: var(--font-geist-sans, Arial, Helvetica, sans-serif);
+  font-family: "neuzeit-grotesk", system-ui, sans-serif;
 }
 
 a, button, [role="button"], select, label[for], summary { cursor: pointer; }
