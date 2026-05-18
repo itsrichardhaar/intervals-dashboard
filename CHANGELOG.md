@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.23] - 2026-05-18
+
+### Added
+- Sync health badge now reflects real cron activity — each sync endpoint writes to SyncLog on start and completion
+- Staleness guard on sync status: "running" records older than 10 minutes surface as "Sync stalled" instead of spinning forever
+
+### Changed
+- Reduced sync cron frequency from every 15 minutes to every 30 minutes to avoid unnecessary API load
+- Replaced Geist font with Neuzeit Grotesk via Adobe Typekit across the app
+- Collapsible sidebar nav sections with chevron toggles for items with children
+- Global pointer cursor on all links, buttons, and interactive elements
+- Inline Springer icon SVG on login page (bypasses Turbopack public/ serving issue)
+
+### Fixed
+- Prevent line breaks inside table badges and cells with whitespace-nowrap + truncation
+
+---
+
 ## [0.1.22] - 2026-05-15
 
 ### Added

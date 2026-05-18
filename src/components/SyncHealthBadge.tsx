@@ -6,7 +6,7 @@ interface SyncStatusResponse {
   lastSync: {
     completedAt: string | null;
     startedAt: string;
-    status: string; // "running" | "success" | "partial" | "failed"
+    status: string; // "running" | "success" | "partial" | "failed" | "stale"
   } | null;
 }
 
@@ -62,6 +62,15 @@ export default function SyncHealthBadge() {
       <p className="text-xs text-red-400 flex items-center gap-1.5">
         <span className="w-1.5 h-1.5 rounded-full bg-red-400 shrink-0" />
         Sync failed
+      </p>
+    );
+  }
+
+  if (lastSync.status === "stale") {
+    return (
+      <p className="text-xs text-red-400 flex items-center gap-1.5">
+        <span className="w-1.5 h-1.5 rounded-full bg-red-400 shrink-0" />
+        Sync stalled
       </p>
     );
   }
