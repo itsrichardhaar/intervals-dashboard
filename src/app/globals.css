@@ -116,3 +116,64 @@ button:disabled { cursor: not-allowed; }
   height: 0;
   pointer-events: none;
 }
+
+/* ── TipTap task list (checkboxes) ──────────────────────────────────────────── */
+.tiptap ul[data-type="taskList"],
+.sop-prose ul[data-type="taskList"] {
+  list-style: none;
+  padding-left: 0;
+  margin-bottom: 0.75em;
+}
+.tiptap ul[data-type="taskList"] li,
+.sop-prose ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.25em;
+}
+.tiptap ul[data-type="taskList"] li > label,
+.sop-prose ul[data-type="taskList"] li > label {
+  flex-shrink: 0;
+  margin-top: 0.1em;
+  cursor: pointer;
+}
+.tiptap ul[data-type="taskList"] li > label input[type="checkbox"],
+.sop-prose ul[data-type="taskList"] li > label input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid var(--dash-border);
+  border-radius: 3px;
+  background: var(--dash-surface);
+  cursor: pointer;
+  display: block;
+  position: relative;
+  transition: background 0.15s, border-color 0.15s;
+}
+.tiptap ul[data-type="taskList"] li > label input[type="checkbox"]:checked,
+.sop-prose ul[data-type="taskList"] li > label input[type="checkbox"]:checked {
+  background: var(--dash-accent);
+  border-color: var(--dash-accent);
+}
+.tiptap ul[data-type="taskList"] li > label input[type="checkbox"]:checked::after,
+.sop-prose ul[data-type="taskList"] li > label input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 0px;
+  width: 7px;
+  height: 4px;
+  border-left: 1.5px solid #000;
+  border-bottom: 1.5px solid #000;
+  transform: rotate(-45deg);
+}
+.tiptap ul[data-type="taskList"] li > div,
+.sop-prose ul[data-type="taskList"] li > div {
+  flex: 1;
+}
+.tiptap ul[data-type="taskList"] li[data-checked="true"] > div,
+.sop-prose ul[data-type="taskList"] li[data-checked="true"] > div {
+  color: var(--dash-text-dim);
+  text-decoration: line-through;
+}

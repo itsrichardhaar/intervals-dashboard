@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.24] - 2026-05-26
+
+### Added
+- Checkbox/task list support in SOP rich text editor — toolbar button, paste from Google Docs, and toggle bullet lists to checkboxes; checked items render with strikethrough in view mode
+
+---
+
 ## [0.1.23] - 2026-05-18
 
 ### Added

@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { Placeholder } from "@tiptap/extension-placeholder";
+import TaskList from "@tiptap/extension-task-list";
+import TaskItem from "@tiptap/extension-task-item";
 import CategoryCombobox from "@/components/CategoryCombobox";
 import {
-  Bold, Italic, List, ListOrdered, Heading2, Heading3, Undo, Redo,
+  Bold, Italic, List, ListOrdered, Heading2, Heading3, Undo, Redo, ListChecks,
 } from "lucide-react";
 
 interface Category { id: string; name: string }
@@ -39,6 +41,8 @@ export default function SopEditor({ categories, initial }: Props) {
     extensions: [
       StarterKit,
       Placeholder.configure({ placeholder: "Write your procedure here…" }),
+      TaskList,
+      TaskItem.configure({ nested: true }),
     ],
     content: initial?.body ?? "",
     editorProps: {
@@ -147,6 +151,7 @@ export default function SopEditor({ categories, initial }: Props) {
               { icon: Heading3,     action: () => editor?.chain().focus().toggleHeading({ level: 3 }).run(), active: editor?.isActive("heading", { level: 3 }) },
               { icon: List,         action: () => editor?.chain().focus().toggleBulletList().run(),  active: editor?.isActive("bulletList") },
               { icon: ListOrdered,  action: () => editor?.chain().focus().toggleOrderedList().run(), active: editor?.isActive("orderedList") },
+              { icon: ListChecks,   action: () => editor?.chain().focus().toggleTaskList().run(),    active: editor?.isActive("taskList") },
             ].map(({ icon: Icon, action, active }, i) => (
               <button
                 key={i}

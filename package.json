@@ -1,6 +1,6 @@
 {
   "name": "intervals-dashboard",
-  "version": "0.1.23",
+  "version": "0.1.24",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -15,6 +15,8 @@
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7",
     "@tiptap/extension-placeholder": "^3.23.4",
+    "@tiptap/extension-task-item": "^3.23.6",
+    "@tiptap/extension-task-list": "^3.23.6",
     "@tiptap/pm": "^3.23.4",
     "@tiptap/react": "^3.23.4",
     "@tiptap/starter-kit": "^3.23.4",
